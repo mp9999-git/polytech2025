@@ -119,8 +119,22 @@ class LoadingScreen {
   /** スタート処理 */
   _onStart() {
     if (!this._loaded) return;
+    // Android Chromeはユーザー操作の直接コールスタック内でないと全画面が効かないためここで実行
+    this._requestFullscreen();
     this._app.sound.requestWakeLock();
     this._app.goToTitle();
+  }
+
+  _requestFullscreen() {
+    const el = document.documentElement;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    }
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
+    }
   }
 }
 

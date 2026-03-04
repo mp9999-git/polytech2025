@@ -58,7 +58,8 @@ class App {
 
   /** ローディング完了 → タイトルへ */
   goToTitle() {
-    if (!this._isPC()) {
+    // ローディング以外（エンディング等）からタイトルに戻る場合のフォールバック
+    if (!this._isPC() && !document.fullscreenElement && !document.webkitFullscreenElement) {
       const el = document.documentElement;
       if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
