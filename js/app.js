@@ -187,6 +187,8 @@ class App {
 
   _initScaling() {
     this._applyScale();
+    // スケール適用後にフェードイン（初回レンダリングフラッシュ防止）
+    requestAnimationFrame(() => { this._container.style.opacity = '1'; });
     window.addEventListener('resize', () => this._applyScale());
     screen.orientation?.addEventListener('change', () => this._applyScale());
   }
@@ -194,10 +196,6 @@ class App {
   _applyScale() {
     const vw     = window.innerWidth;
     const vh     = window.innerHeight;
-    // 初回のみ: スケール適用後にフェードイン（ローディング前の縮小フラッシュ防止）
-    if (this._container.style.opacity === '0') {
-      requestAnimationFrame(() => { this._container.style.opacity = '1'; });
-    }
     const scaleX = vw / 1920;
     const scaleY = vh / 1080;
     const scale  = Math.min(scaleX, scaleY);
