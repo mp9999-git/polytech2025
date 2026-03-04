@@ -1203,6 +1203,7 @@ html, body {
   margin-bottom: 20px;
 }
 
+/* 楽曲リストの1行 */
 .mt-track-row {
   display: flex;
   align-items: center;
@@ -1212,6 +1213,12 @@ html, body {
   border-radius: 16px;
   padding: 16px 32px;
   justify-content: space-between;
+  transition: border-color 0.2s, background 0.2s;
+}
+/* 再生中の楽曲行をハイライト表示 */
+.mt-track-row.mt-playing {
+  border-color: rgba(100, 200, 255, 0.8);
+  background: rgba(20, 60, 120, 0.85);
 }
 
 .mt-btn-group {

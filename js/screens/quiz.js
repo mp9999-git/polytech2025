@@ -3,6 +3,18 @@
  * 3択問題・親密度システム（ステージクリア時のみ確定保存）
  * タイピングアニメーション・クリアオーバーレイ対応
  * メッセージは data/messages_quiz.json から読み込む
+ *
+ * 【親密度の仕組み】
+ *  - クイズ中は _localIntimacy というローカルコピーで増減を管理する
+ *  - 正解: +1（上限なし）/ 不正解: -1（最小0）
+ *  - ステージクリア時のみ app.state.intimacy に反映・保存する
+ *  - 途中で「タイトルへ戻る」とロールバックされ、state は変わらない
+ *
+ * 【クリア時の先生表情】
+ *  親密度 0   → _cry（Mode1） または _cry2（Mode2）
+ *  親密度 1   → _cry
+ *  親密度 2-3 → 通常（接尾辞なし）
+ *  親密度 4+  → _happy
  */
 
 import Confetti from '../confetti.js';
@@ -334,8 +346,10 @@ class QuizScreen {
     this._startTyping(fullText, this._msgText);
   }
 
+  /** 親密度表示を更新し、一瞬拡大するアニメーションを付ける */
   _updateIntimacyDisplay(value) {
     this._intimacyLbl.textContent = value;
+    // scale(1.5) → 150ms後に scale(1) に戻すことでバウンスエフェクトを演出
     this._intimacyLbl.style.transform = 'scale(1.5)';
     setTimeout(() => {
       this._intimacyLbl.style.transform = 'scale(1)';
@@ -343,15 +357,23 @@ class QuizScreen {
     }, 150);
   }
 
+  /**
+   * 「+1」や「-1」を画面上でふわっと浮かび上がらせるエフェクト
+   * @param {string} text - 表示するテキスト（'+1' または '-1'）
+   * @param {string} type - 'positive'（金色）または 'negative'（青色）
+   */
   _showIntimacyEffect(text, type) {
     const el = this._intimacyFx;
     el.textContent = text;
+    // className を直接セットすることで CSS の .positive / .negative スタイルを適用
     el.className   = `${type}`;
     el.style.display = 'block';
     el.style.left = '140px';
     el.style.top  = '200px';
+    // animation を一度リセットしてから再設定することで、連続クリック時にも毎回アニメが動く
+    // void el.offsetWidth は DOM の再描画（reflow）を強制するおまじない
     el.style.animation = 'none';
-    void el.offsetWidth; // reflow
+    void el.offsetWidth; // reflow（これがないと animation のリセットが効かない場合がある）
     el.style.animation = 'intimacy-float 1.2s ease-out forwards';
     setTimeout(() => { el.style.display = 'none'; }, 1200);
   }

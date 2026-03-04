@@ -1,6 +1,16 @@
 /**
  * sound.js - SoundManager
  * BGM・SE の再生管理、WakeLock、Page Visibility 対応
+ *
+ * 【主な機能】
+ *  - BGM: HTML の <audio> 要素を使ってループ再生
+ *  - SE: Audio() を都度生成して多重再生に対応
+ *  - WakeLock API: 画面スリープを防止（スマートフォン向け）
+ *  - Page Visibility API: タブを非表示にした時に BGM を自動一時停止・復帰
+ *
+ * 【_bgmPaused と _muted の違い】
+ *  - _bgmPaused: タブ非表示など「システム都合」で一時停止した状態（再表示時に自動再開）
+ *  - _muted: ユーザーが明示的にミュートした状態（自動解除しない）
  */
 
 const BGM_FILES = {
@@ -24,12 +34,12 @@ class SoundManager {
     this._seSuccess  = document.getElementById('se-success');
     this._seMiss     = document.getElementById('se-miss');
 
-    this._currentBGM  = null;
-    this._bgmPaused   = false;
-    this._wakeLock    = null;
-    this._bgmVolume   = 0.75;
-    this._seVolume    = 0.8;
-    this._muted       = false;
+    this._currentBGM  = null;   // 現在再生中の BGM ファイルパス
+    this._bgmPaused   = false;  // タブ非表示時に一時停止した場合 true（BGM再開に使う）
+    this._wakeLock    = null;   // WakeLock オブジェクト（スリープ防止）
+    this._bgmVolume   = 0.75;  // BGM の音量（0.0 〜 1.0）
+    this._seVolume    = 0.8;   // SE の音量（0.0 〜 1.0）
+    this._muted       = false;  // ユーザーが明示的にミュートしているか
 
     if (this._bgmPlayer) {
       this._bgmPlayer.volume = this._bgmVolume;

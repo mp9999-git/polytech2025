@@ -1,6 +1,16 @@
 /**
  * developer.js - 開発チーム画面
  * developer_info.txt を fetch して表示、team.mp3 をBGMとして再生
+ *
+ * 【テキスト読み込みの最適化】
+ *  初回表示時のみ fetch し、以降は _loaded フラグで再取得をスキップする
+ *  ローディング画面でキャッシュされていれば app.dataCache から取得するため
+ *  ほとんどの場合は即時表示される
+ *
+ * 【背景画像のモード対応】
+ *  #dev-bg は div 要素で CSS で background-image を設定しているが、
+ *  show() 内で JS から style.backgroundImage を上書きすることで
+ *  Mode1/Mode2 に応じた画像に切り替える
  */
 
 class DeveloperScreen {

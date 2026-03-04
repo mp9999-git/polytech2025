@@ -1,6 +1,16 @@
 /**
  * loading.js - ローディング画面
- * 全アセット（画像・音声）をプリロードし、完了後モード選択待ち
+ * 全アセット（画像・音声・データ）をプリロードし、完了後にモード選択画面を表示する
+ *
+ * 【読み込み対象】
+ *  IMAGE_ASSETS     : Mode1（乙女）用の画像一覧
+ *  MODE2_IMAGE_ASSETS: Mode2（SD）用の画像一覧
+ *  AUDIO_ASSETS     : BGM・SE の音声ファイル一覧
+ *  DATA_ASSETS      : JSON・テキストデータ一覧（app.dataCache に保存）
+ *
+ * 【なぜ事前に全部読み込むのか？】
+ *  ゲーム中に初めてアクセスすると読み込み待ちが発生して体験が悪くなるため、
+ *  最初に全て読み込んでキャッシュしておくことでスムーズな動作を実現する
  */
 
 const IMAGE_ASSETS = [
@@ -132,33 +142,42 @@ class LoadingScreen {
     };
 
     // 画像プリロード（Mode1 + Mode2 両方）
+    // new Image() でブラウザのキャッシュに先読みする
     const imgPromises = allImgs.map(src => new Promise(resolve => {
       const img = new Image();
       img.onload  = () => { updateProgress(); resolve(); };
-      img.onerror = () => { updateProgress(); resolve(); }; // 失敗しても続行
+      img.onerror = () => {
+        // 読み込み失敗しても他のアセットのロードを止めずに続行する
+        console.warn('Image load failed:', src);
+        updateProgress();
+        resolve();
+      };
       img.src = src;
     }));
 
-    // 音声プリロード（canplaythrough まで待機）
+    // 音声プリロード（canplaythrough イベントまで待機）
+    // canplaythrough = 「最後まで途切れずに再生できる」と判断できた時点
+    // タイムアウト3秒を設けることで、ネットワークが遅くてもゲームが止まらないようにする
     const audPromises = AUDIO_ASSETS.map(src => new Promise(resolve => {
       const aud = new Audio();
       aud.preload = 'auto';
       let settled = false;
+      // settled フラグで「もし複数回呼ばれても一度だけ処理する」ようにしている
       const done = () => { if (settled) return; settled = true; updateProgress(); resolve(); };
       aud.addEventListener('canplaythrough', done, { once: true });
       aud.addEventListener('error', done, { once: true });
-      // タイムアウト3秒でも続行
-      setTimeout(done, 3000);
+      setTimeout(done, 3000); // タイムアウト3秒でも続行（音声が長い場合の保険）
       aud.src = src;
     }));
 
-    // データプリロード（JSON/テキストをキャッシュ）
+    // データプリロード（JSON/テキストを fetch して app.dataCache に保存）
+    // 各画面はまずキャッシュを参照し、なければ別途 fetch する設計になっている
     const dataPromises = DATA_ASSETS.map(src => new Promise(resolve => {
-      const isTxt = src.endsWith('.txt');
+      const isTxt = src.endsWith('.txt'); // .txt はテキスト、それ以外は JSON として処理
       fetch(src)
         .then(res => isTxt ? res.text() : res.json())
         .then(data => { this._app.dataCache[src] = data; })
-        .catch(() => {}) // 失敗しても続行
+        .catch(() => {}) // 読み込み失敗しても続行（各画面で個別にフォールバック）
         .finally(() => { updateProgress(); resolve(); });
     }));
 

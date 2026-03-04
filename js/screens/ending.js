@@ -2,6 +2,18 @@
  * ending.js - エンディング画面
  * 全ステージクリア後、親密度に基づいてGOOD END / NORMAL ENDを判定
  * メッセージは data/messages_ending.json から読み込む
+ *
+ * 【エンディング判定ロジック】
+ *  全先生の中で最高の親密度を調べ、GOOD_END_THRESHOLD（3）以上なら GOOD END
+ *  同じ最高親密度の先生が複数いる場合は、全員まとめて表示する
+ *
+ * 【NORMAL END での先生表示ルール】
+ *  親密度が 0 の先生は表示しない
+ *  全員 0 の場合は先生が一人も表示されず、専用メッセージ（normal_no_teacher）が流れる
+ *
+ * 【Mode2 での画像サイズ補正】
+ *  Mode2（SDゲームモード）の SD キャラ画像は元サイズが小さいため、
+ *  JS で明示的に height: 480px を指定して拡大表示する
  */
 
 import Confetti from '../confetti.js';

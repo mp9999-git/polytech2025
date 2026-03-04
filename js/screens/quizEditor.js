@@ -1,6 +1,15 @@
 /**
  * quizEditor.js - 問題閲覧モード画面
  * 各カテゴリのクイズ問題を読み取り専用で一覧表示する
+ *
+ * 【XSS 対策について】
+ *  問題データを innerHTML に埋め込む際は _esc() で HTML エスケープを行い、
+ *  スクリプトインジェクション（XSS 攻撃）を防いでいる
+ *  例：< → &lt;  > → &gt;  " → &quot;  & → &amp;
+ *
+ * 【キャッシュ】
+ *  一度読み込んだカテゴリのデータは this._cache に保持し、
+ *  タブを切り替えるたびに再取得しないようにしている
  */
 
 const CATEGORIES = ['Network', 'PLC', 'Database', 'Java', 'Android'];

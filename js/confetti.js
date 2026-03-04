@@ -1,6 +1,18 @@
 /**
  * confetti.js - 紙吹雪パーティクルエンジン
- * Canvas要素に120個のパーティクルを描画する
+ * Canvas 要素に PARTICLE_COUNT 個のパーティクルを描画する
+ *
+ * 【パーティクルの物理パラメータ】
+ *  vx / vy    : 横・縦方向の速度（px/フレーム）
+ *  wobble     : 横揺れの位相（ラジアン）
+ *  wobbleSpd  : 横揺れの速さ（フレームごとに加算）
+ *  rotation   : 回転角度（度）
+ *  rotSpeed   : 回転速度（度/フレーム）
+ *  isEllipse  : true なら楕円、false なら四角形
+ *
+ * 【横揺れの仕組み】
+ *  毎フレーム wobble を少しずつ増やし、sin(wobble) の値で x 座標を左右に揺らすことで
+ *  リアルな「ひらひら落ちる」動きを表現している
  */
 
 const COLORS = [
@@ -79,9 +91,13 @@ class Confetti {
     ctx.clearRect(0, 0, w, h);
 
     for (const p of this._particles) {
+      // 横揺れの位相を進める（sin 波の入力値）
       p.wobble   += p.wobbleSpd;
+      // x: 基本の横速度 + sin 波による揺れ（±1.5px）でひらひら感を演出
       p.x        += p.vx + Math.sin(p.wobble) * 1.5;
+      // y: 下向きの速度で落下
       p.y        += p.vy;
+      // 回転角度を更新
       p.rotation += p.rotSpeed;
 
       // 画面外に出たら上端から再生成
