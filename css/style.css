@@ -837,7 +837,7 @@ html, body {
   z-index: 20;
 }
 
-#ending-msg-body { overflow-y: auto; max-height: 160px; }
+#ending-msg-body { overflow-y: auto; max-height: 240px; }
 
 #ending-msg-text {
   font-size: 36px;

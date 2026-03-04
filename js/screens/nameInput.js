@@ -69,8 +69,8 @@ class NameInputScreen {
 
   /** 先生名テキストボックスに性別別ランダム5件をセット */
   _fillTeacherNames() {
-    // Network:男, PLC:女, Database:男, Java:女, Android:男
-    const GENDER_MAP = ['male', 'female', 'male', 'female', 'male'];
+    // Network:男, PLC:男, Database:男, Java:女, Android:男
+    const GENDER_MAP = ['male', 'male', 'male', 'female', 'male'];
     const malePool   = [...(this._teacherNames?.male   || [])];
     const femalePool = [...(this._teacherNames?.female || [])];
 
