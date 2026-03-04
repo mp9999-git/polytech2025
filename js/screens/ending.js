@@ -88,7 +88,7 @@ class EndingScreen {
   }
 
   _showGoodEnd(topCharIds, teacherNames) {
-    this._bgImg.src = 'assets/images/ending_good.webp';
+    this._bgImg.src = this._app.getImgPath('ending_good.webp');
     this._app.sound.playBGM('ending_happy');
 
     this._typeText.textContent = '✨ GOOD END ✨';
@@ -116,35 +116,50 @@ class EndingScreen {
   }
 
   _showNormalEnd(topCharIds, teacherNames) {
-    this._bgImg.src = 'assets/images/ending_normal.webp';
+    this._bgImg.src = this._app.getImgPath('ending_normal.webp');
     this._app.sound.playBGM('ending_normal');
 
     this._typeText.textContent = 'NORMAL END';
     this._typeText.style.color = '#FF0000';
 
-    // キャラクター表示（通常）
-    this._renderChars(topCharIds, teacherNames, this._app.state.intimacy, false);
+    // 親密度が0の先生は表示しない
+    const intimacy = this._app.state.intimacy;
+    const visibleIds = topCharIds.filter(id => (intimacy[id] || 0) > 0);
+    this._renderChars(visibleIds, teacherNames, intimacy, false);
 
-    // normalはランダム選択
-    const topName = teacherNames[topCharIds[0] - 1] || `先生${topCharIds[0]}`;
-    const normalPatterns = this._messages.normal || [];
+    // 先生が表示されるかどうかでメッセージパターンを切り替え
+    const patternKey = visibleIds.length > 0 ? 'normal' : 'normal_no_teacher';
+    const normalPatterns = this._messages[patternKey] || this._messages.normal || [];
     const tpl = normalPatterns[Math.floor(Math.random() * normalPatterns.length)] || '';
+    const topName = visibleIds.length > 0
+      ? (teacherNames[visibleIds[0] - 1] || `先生${visibleIds[0]}`)
+      : '';
     const msg = this._applyTemplate(tpl, { teacher: topName });
     this._startTyping(msg, this._msgText);
   }
 
   _renderChars(charIds, teacherNames, intimacy, isHappy) {
     this._charsContainer.innerHTML = '';
-    const suffix = isHappy ? '_happy' : '';
+    let suffix;
+    if (isHappy) {
+      suffix = this._app.state.gameMode === 2 ? '_ending' : '_happy';
+    } else {
+      suffix = '';
+    }
     charIds.forEach(id => {
       const name = teacherNames[id - 1] || `先生${id}`;
       const item = document.createElement('div');
       item.className = 'ending-char-item';
 
       const img = document.createElement('img');
-      img.src       = `assets/images/teacher${id}${suffix}.webp`;
+      img.src       = this._app.getImgPath(`teacher${id}${suffix}.webp`);
       img.className = 'ending-char-img';
       img.alt       = name;
+      // Mode2のSDキャラは小さいため高さを固定して拡大表示
+      if (this._app.state.gameMode === 2) {
+        img.style.height = '480px';
+        img.style.width  = 'auto';
+      }
 
       const nameLbl = document.createElement('div');
       nameLbl.className = 'ending-char-name';
@@ -180,6 +195,9 @@ class EndingScreen {
     }
     this._typingEl.textContent += this._typingFull[this._typingPos];
     this._typingPos++;
+    // 最新行が見えるように自動スクロール
+    const msgBody = document.getElementById('ending-msg-body');
+    if (msgBody) msgBody.scrollTop = msgBody.scrollHeight;
     this._typingTimer = setTimeout(() => this._typeChar(), TYPING_INTERVAL);
   }
 

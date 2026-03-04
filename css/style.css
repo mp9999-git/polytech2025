@@ -149,7 +149,6 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 #loading-tap-box {
@@ -166,11 +165,67 @@ html, body {
 #loading-tap-overlay.hidden { display: none; }
 
 #tap-to-start-text {
-  font-size: 72px;
+  font-size: 60px;
   font-weight: bold;
   color: #fff;
   text-shadow: 0 0 30px rgba(100,200,255,0.9);
-  animation: pulse-text 1.5s ease-in-out infinite;
+}
+
+/* モード選択ボタン */
+#mode-btn-row {
+  display: flex;
+  gap: 60px;
+  justify-content: center;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 380px;
+  padding: 48px 36px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+}
+
+.mode-btn:hover, .mode-btn:focus {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+  outline: none;
+}
+
+.mode-btn:active {
+  transform: translateY(-2px);
+}
+
+.mode-btn-1 {
+  background: linear-gradient(145deg, #e91e8c, #c2185b);
+  border: 2px solid rgba(255,160,200,0.5);
+}
+
+.mode-btn-2 {
+  background: linear-gradient(145deg, #0288d1, #01579b);
+  border: 2px solid rgba(100,200,255,0.5);
+}
+
+.mode-btn-title {
+  font-size: 48px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.mode-btn-desc {
+  font-size: 28px;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  line-height: 1.4;
 }
 
 #recommend-landscape {
@@ -229,6 +284,19 @@ html, body {
   inset: 0;
   background: transparent;
 }
+
+#title-mode2-overlay {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75%;
+  height: auto;
+  object-fit: contain;
+  z-index: 2;
+  pointer-events: none;
+}
+#title-mode2-overlay.hidden { display: none; }
 
 #title-text {
   position: absolute;
@@ -837,7 +905,7 @@ html, body {
   z-index: 20;
 }
 
-#ending-msg-body { overflow-y: auto; max-height: 240px; }
+#ending-msg-body { overflow-y: auto; max-height: 300px; }
 
 #ending-msg-text {
   font-size: 36px;

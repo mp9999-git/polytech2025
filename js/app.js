@@ -74,7 +74,9 @@ class App {
 
   /** 新規ゲーム開始（全リセット） */
   newGame() {
+    const savedMode = this.state.gameMode;
     this.state = resetState();
+    this.state.gameMode = savedMode;
     saveState(this.state);
     this._showToast('データをリセットしました');
     this._showScreen('nameInput');
@@ -148,6 +150,12 @@ class App {
   /** 状態を保存 */
   saveState() {
     saveState(this.state);
+  }
+
+  /** モードに応じた画像パスを返す */
+  getImgPath(filename) {
+    const folder = this.state.gameMode === 2 ? 'assets/images2' : 'assets/images';
+    return `${folder}/${filename}`;
   }
 
   // ---- private ----

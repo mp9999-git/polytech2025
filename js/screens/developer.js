@@ -21,6 +21,13 @@ class DeveloperScreen {
     this._el.classList.remove('hidden');
     this._el.classList.add('active');
     this._app.sound.playBGM('team');
+
+    // モードに応じた背景画像を設定
+    const devBg = document.getElementById('dev-bg');
+    if (devBg) {
+      devBg.style.backgroundImage = `url('${this._app.getImgPath('polytech_outside.webp')}')`;
+    }
+
     // スクロール位置をトップに戻す
     const scrollArea = document.getElementById('dev-scroll-area');
     if (scrollArea) scrollArea.scrollTop = 0;

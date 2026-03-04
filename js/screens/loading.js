@@ -1,6 +1,6 @@
 /**
  * loading.js - ローディング画面
- * 全アセット（画像・音声）をプリロードし、完了後タップ待ち
+ * 全アセット（画像・音声）をプリロードし、完了後モード選択待ち
  */
 
 const IMAGE_ASSETS = [
@@ -27,6 +27,41 @@ const IMAGE_ASSETS = [
   'assets/images/teacher5_cry.webp'
 ];
 
+const MODE2_IMAGE_ASSETS = [
+  'assets/images2/poly.webp',
+  'assets/images2/polytech_outside.webp',
+  'assets/images2/haikei.webp',
+  'assets/images2/polytech_run.webp',
+  'assets/images2/ending_good.webp',
+  'assets/images2/ending_normal.webp',
+  'assets/images2/title.webp',
+  'assets/images2/teacher1.webp',
+  'assets/images2/teacher1_happy.webp',
+  'assets/images2/teacher1_cry.webp',
+  'assets/images2/teacher1_cry2.webp',
+  'assets/images2/teacher1_ending.webp',
+  'assets/images2/teacher2.webp',
+  'assets/images2/teacher2_happy.webp',
+  'assets/images2/teacher2_cry.webp',
+  'assets/images2/teacher2_cry2.webp',
+  'assets/images2/teacher2_ending.webp',
+  'assets/images2/teacher3.webp',
+  'assets/images2/teacher3_happy.webp',
+  'assets/images2/teacher3_cry.webp',
+  'assets/images2/teacher3_cry2.webp',
+  'assets/images2/teacher3_ending.webp',
+  'assets/images2/teacher4.webp',
+  'assets/images2/teacher4_happy.webp',
+  'assets/images2/teacher4_cry.webp',
+  'assets/images2/teacher4_cry2.webp',
+  'assets/images2/teacher4_ending.webp',
+  'assets/images2/teacher5.webp',
+  'assets/images2/teacher5_happy.webp',
+  'assets/images2/teacher5_cry.webp',
+  'assets/images2/teacher5_cry2.webp',
+  'assets/images2/teacher5_ending.webp'
+];
+
 const AUDIO_ASSETS = [
   'assets/sounds/opening1.mp3',
   'assets/sounds/opening2.mp3',
@@ -48,6 +83,7 @@ const DATA_ASSETS = [
   'assets/data/teacher_names.json',
   'assets/data/messages_story.json',
   'assets/data/messages_quiz.json',
+  'assets/data/messages_quiz_clear.json',
   'assets/data/messages_ending.json',
   'assets/data/quiz_network.json',
   'assets/data/quiz_plc.json',
@@ -65,7 +101,6 @@ class LoadingScreen {
     this._barEl     = document.getElementById('loading-progress-bar');
     this._overlay   = document.getElementById('loading-tap-overlay');
     this._loaded    = false;
-    this._onTap     = null;
   }
 
   show() {
@@ -83,7 +118,8 @@ class LoadingScreen {
   /** 全アセット読み込み開始 */
   async _startLoading() {
     this._app.dataCache = {};
-    const total = IMAGE_ASSETS.length + AUDIO_ASSETS.length + DATA_ASSETS.length;
+    const allImgs = [...IMAGE_ASSETS, ...MODE2_IMAGE_ASSETS];
+    const total = allImgs.length + AUDIO_ASSETS.length + DATA_ASSETS.length;
     let loaded  = 0;
 
     const updateProgress = () => {
@@ -95,8 +131,8 @@ class LoadingScreen {
       }
     };
 
-    // 画像プリロード
-    const imgPromises = IMAGE_ASSETS.map(src => new Promise(resolve => {
+    // 画像プリロード（Mode1 + Mode2 両方）
+    const imgPromises = allImgs.map(src => new Promise(resolve => {
       const img = new Image();
       img.onload  = () => { updateProgress(); resolve(); };
       img.onerror = () => { updateProgress(); resolve(); }; // 失敗しても続行
@@ -128,11 +164,11 @@ class LoadingScreen {
 
     await Promise.all([...imgPromises, ...audPromises, ...dataPromises]);
     this._loaded = true;
-    this._showTapOverlay();
+    this._showModeSelect();
   }
 
-  /** 「タップしてスタート」オーバーレイ表示 */
-  _showTapOverlay() {
+  /** モード選択オーバーレイ表示 */
+  _showModeSelect() {
     this._overlay.classList.remove('hidden');
 
     // iOS Safari判定：スタンドアロンモード未起動なら使用方法ヒントを表示
@@ -140,32 +176,28 @@ class LoadingScreen {
       this._showIOSHint();
     }
 
+    const btn1 = document.getElementById('btn-mode1');
+    const btn2 = document.getElementById('btn-mode2');
+
+    const onModeSelect = (mode) => {
+      if (!this._loaded) return;
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
+      this._app.state.gameMode = mode;
+      this._app.saveState();
+      this._app.sound.requestWakeLock();
+      this._app.goToTitle();
+    };
+
     // touchend: Android Chromeでフルスクリーンが最も確実に動作するイベント
-    this._overlay.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      // フルスクリーンをジェスチャー直結でインライン実行（コールスタックを最小化）
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
-      this._onStart();
-    }, { once: true, passive: false });
+    btn1.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); onModeSelect(1); }, { once: true, passive: false });
+    btn2.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); onModeSelect(2); }, { once: true, passive: false });
 
-    // clickはtouchendが発火しなかったPC/環境向けのフォールバック
-    this._overlay.addEventListener('click', () => {
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
-      this._onStart();
-    }, { once: true });
-  }
-
-  /** スタート処理 */
-  _onStart() {
-    if (!this._loaded) return;
-    this._app.sound.requestWakeLock();
-    this._app.goToTitle();
+    // click: PC/フォールバック向け
+    btn1.addEventListener('click', (e) => { e.stopPropagation(); onModeSelect(1); }, { once: true });
+    btn2.addEventListener('click', (e) => { e.stopPropagation(); onModeSelect(2); }, { once: true });
   }
 
   _isIOS() {

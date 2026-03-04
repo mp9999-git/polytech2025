@@ -61,6 +61,9 @@ class StoryScreen {
     this._teacherName.textContent = '';
     this._msgText.textContent = '';
 
+    // 背景画像をモードに応じて設定
+    document.getElementById('story-bg').src = this._app.getImgPath('haikei.webp');
+
     // BGM
     this._app.sound.playBGM('introduction');
 
@@ -107,7 +110,7 @@ class StoryScreen {
     if (speaker === '{player}') {
       this._charImg.style.visibility = 'hidden';
     } else {
-      this._charImg.src = `assets/images/teacher${this._charId}.webp`;
+      this._charImg.src = this._app.getImgPath(`teacher${this._charId}.webp`);
       this._charImg.style.visibility = 'visible';
     }
 

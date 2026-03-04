@@ -137,7 +137,7 @@
 
 【日本語版ライセンス規定 / Japanese License Terms】
 
-著作権表示 / Copyright (c) 2024 mp (mp9999-git)
+著作権表示 / Copyright (c) 2026 mp (mp9999-git)
 
 本プロジェクト（修了制作）は、成果物の種類に応じて以下のライセンスを適用しています。
 
@@ -155,3 +155,5 @@
 免責事項 / Disclaimer
 本ソフトウェアおよびコンテンツは「現状のまま」提供され、明示または黙示を問わず、いかなる保証も行いません。
 This software and content are provided "as is", without warranty of any kind.
+
+※詳細なライセンス(英文)については、LICENSEファイルを参照してください。

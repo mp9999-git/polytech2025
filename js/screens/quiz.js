@@ -61,6 +61,8 @@ class QuizScreen {
 
     // メッセージキャッシュ
     this._messages = null;
+    // クリアメッセージキャッシュ（得点別）
+    this._clearMessages = null;
     // クイズデータキャッシュ（カテゴリ別）
     this._questionsCache = {};
 
@@ -116,6 +118,9 @@ class QuizScreen {
     this._nextBtn.classList.add('hidden');
     this._choiceBtns.forEach(btn => { btn.style.visibility = 'hidden'; });
 
+    // 背景画像をモードに応じて設定
+    document.getElementById('quiz-bg').src = this._app.getImgPath('haikei.webp');
+
     this._app.sound.playBGM('quiz');
 
     // ローカル親密度をstateからコピー（クリア時のみstateに反映）
@@ -130,6 +135,19 @@ class QuizScreen {
           this._messages = await res.json();
         } catch {
           this._messages = { prompt: {}, correct: {}, wrong: {}, clear: {} };
+        }
+      }
+    }
+
+    // 得点別クリアメッセージ JSON を取得してキャッシュ
+    if (!this._clearMessages) {
+      this._clearMessages = this._app.dataCache?.['assets/data/messages_quiz_clear.json'] || null;
+      if (!this._clearMessages) {
+        try {
+          const res = await fetch('assets/data/messages_quiz_clear.json');
+          this._clearMessages = await res.json();
+        } catch {
+          this._clearMessages = {};
         }
       }
     }
@@ -217,7 +235,7 @@ class QuizScreen {
     });
 
     // キャラ（通常）
-    this._charImg.src = `assets/images/teacher${charId}.webp`;
+    this._charImg.src = this._app.getImgPath(`teacher${charId}.webp`);
     this._charImg.style.opacity = '1';
     this._choiceBtns.forEach(btn => { btn.style.visibility = 'visible'; });
 
@@ -276,7 +294,7 @@ class QuizScreen {
       this._updateIntimacyDisplay(this._localIntimacy[charId]);
       this._showIntimacyEffect('+1', 'positive');
       // キャラ笑顔
-      this._charImg.src = `assets/images/teacher${charId}_happy.webp`;
+      this._charImg.src = this._app.getImgPath(`teacher${charId}_happy.webp`);
       // 紙吹雪
       this._confetti.start();
       this._confettiTimer = setTimeout(() => {
@@ -294,7 +312,7 @@ class QuizScreen {
       this._updateIntimacyDisplay(this._localIntimacy[charId]);
       this._showIntimacyEffect('-1', 'negative');
       // キャラ泣き顔
-      this._charImg.src = `assets/images/teacher${charId}_cry.webp`;
+      this._charImg.src = this._app.getImgPath(`teacher${charId}_cry.webp`);
       // コメント（タイピング）＋解説を1テキストで表示
       const comments = (this._messages.wrong || {})[charId] || (this._messages.wrong || {})['1'] || [];
       const comment = comments[Math.floor(Math.random() * comments.length)] || '';
@@ -365,18 +383,36 @@ class QuizScreen {
       this._clearOverlay.classList.remove('hidden');
       this._app.sound.playBGM('clear');
 
-      // 先生をhappy表情に
-      this._charImg.src = `assets/images/teacher${this._charId}_happy.webp`;
+      // 先生の表情を親密度に応じて選択（0:cry2/cry 1:cry 2-3:normal 4-5:happy）
+      const clearIntimacy = this._localIntimacy[this._charId] || 0;
+      let clearFile;
+      if (clearIntimacy >= 4) {
+        clearFile = `teacher${this._charId}_happy.webp`;
+      } else if (clearIntimacy >= 2) {
+        clearFile = `teacher${this._charId}.webp`;
+      } else if (clearIntimacy === 1) {
+        clearFile = `teacher${this._charId}_cry.webp`;
+      } else {
+        clearFile = (this._app.state.gameMode === 2)
+          ? `teacher${this._charId}_cry2.webp`
+          : `teacher${this._charId}_cry.webp`;
+      }
+      this._charImg.src = this._app.getImgPath(clearFile);
 
       // 先生名を表示
       const teacherName = this._app.state.teacherNames[this._charId - 1] || `先生${this._charId}`;
       this._teacherName.textContent = teacherName;
 
-      // ステージクリア総評メッセージをタイピング（先頭に正解数を表示）
-      const clears = (this._messages.clear || {})[this._charId] || (this._messages.clear || {})['1'] || [];
-      const clearMsg = clears[Math.floor(Math.random() * clears.length)] || '';
+      // ステージクリア総評メッセージをタイピング（得点別メッセージ）
       const scoreText = `【結果】${this._questions.length}問中${this._correctCount}問正解！`;
-      this._startTyping(scoreText + '\n' + clearMsg, this._msgText);
+      const teacherMsgs = (this._clearMessages || {})[String(this._charId)] || {};
+      const scoreMsgs = teacherMsgs[String(this._correctCount)] || [];
+      const clearMsg = scoreMsgs.length > 0
+        ? scoreMsgs[Math.floor(Math.random() * scoreMsgs.length)]
+        : ((this._messages.clear || {})[this._charId]?.[0] || '');
+      const playerName = this._app.state.playerName || '訓練生';
+      const resolvedMsg = clearMsg.replace(/\{\{player\}\}/g, playerName);
+      this._startTyping(scoreText + '\n' + resolvedMsg, this._msgText);
 
       // 次へボタン（遷移用テキスト）
       this._nextBtn.textContent = nextStage ? '次のステージへ ▶' : 'エンディングへ ▶';

@@ -25,8 +25,18 @@
       <!-- 読み込み完了後に表示 -->
       <div id="loading-tap-overlay" class="hidden">
         <div id="loading-tap-box">
-          <p id="tap-to-start-text">タップしてスタート</p>
+          <p id="tap-to-start-text">モードを選択してください</p>
           <p id="recommend-landscape">スマートフォンは横画面を推奨します</p>
+          <div id="mode-btn-row">
+            <button id="btn-mode1" class="mode-btn mode-btn-1">
+              <span class="mode-btn-title">乙女ゲームモード</span>
+              <span class="mode-btn-desc">先生と一緒に勉強しよう！</span>
+            </button>
+            <button id="btn-mode2" class="mode-btn mode-btn-2">
+              <span class="mode-btn-title">SDゲームモード</span>
+              <span class="mode-btn-desc">SDキャラで楽しく学習！</span>
+            </button>
+          </div>
         </div>
         <div id="ios-hint" class="hidden">
           <p>📱 全画面で遊ぶには：</p>
@@ -41,6 +51,7 @@
         <img id="title-bg" src="assets/images/poly.webp" alt="">
       </div>
       <div id="title-overlay"></div>
+      <img id="title-mode2-overlay" class="hidden" src="" alt="">
       <h1 id="title-text">Polytech Memorial</h1>
       <div id="title-buttons-wrap">
         <div id="title-buttons">

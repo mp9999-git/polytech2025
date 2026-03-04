@@ -53,6 +53,26 @@ class TitleScreen {
   show() {
     this._el.classList.remove('hidden');
     this._el.classList.add('active');
+
+    // モードに応じた背景画像を設定（object-fit: cover で解像度差を吸収）
+    this._bg.src = this._app.getImgPath('poly.webp');
+
+    // Mode 2: title.webp オーバーレイをフェードインで表示、タイトルテキストを非表示
+    const overlay = document.getElementById('title-mode2-overlay');
+    const titleText = document.getElementById('title-text');
+    if (this._app.state.gameMode === 2) {
+      overlay.src = 'assets/images2/title.webp';
+      overlay.classList.remove('hidden');
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 1.5s ease';
+      requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+      titleText.style.visibility = 'hidden';
+    } else {
+      overlay.classList.add('hidden');
+      overlay.src = '';
+      titleText.style.visibility = 'visible';
+    }
+
     this._startKenburns();
     // タイトルBGM: オープニング曲ランダム再生
     this._app.sound.playRandomOpening();
@@ -62,6 +82,10 @@ class TitleScreen {
     this._el.classList.remove('active');
     this._el.classList.add('hidden');
     this._stopKenburns();
+    const overlay = document.getElementById('title-mode2-overlay');
+    overlay.classList.add('hidden');
+    overlay.style.opacity = '0';
+    document.getElementById('title-text').style.visibility = 'visible';
   }
 
   /** ケンバーンズエフェクト（ズーム+パン+フェードイン） */

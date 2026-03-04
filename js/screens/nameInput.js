@@ -40,6 +40,11 @@ class NameInputScreen {
     // スライドをリセット（フェーズ1に戻す）
     this._slideContainer.classList.remove('slide-left');
     this._traineeInput.value = this._app.state.playerName || '';
+
+    // 背景画像をモードに応じて設定
+    document.getElementById('name-input-bg').src = this._app.getImgPath('polytech_outside.webp');
+    document.getElementById('name-input-gif').src = this._app.getImgPath('polytech_run.webp');
+
     this._app.sound.playBGM('name_input');
 
     // 先生名をJSONから読み込み

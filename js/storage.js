@@ -17,7 +17,8 @@ const DEFAULT_STATE = {
   },
   intimacy: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
   currentStage: 'Network',
-  allCleared: false
+  allCleared: false,
+  gameMode: 1  // 1: 乙女ゲームモード, 2: SDゲームモード
 };
 
 /** LocalStorageから読み込み */
