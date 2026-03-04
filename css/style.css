@@ -85,7 +85,7 @@ html, body {
    ローディング画面
    ======================================================== */
 #screen-loading {
-  background: url('../assets/images/polytech_outside.png') center/cover no-repeat;
+  background: url('../assets/images/polytech_outside.webp') center/cover no-repeat;
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
@@ -144,14 +144,23 @@ html, body {
 #loading-tap-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: transparent;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#loading-tap-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 40px;
-  cursor: pointer;
+  padding: 60px 80px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 24px;
+  backdrop-filter: blur(4px);
 }
 
 #loading-tap-overlay.hidden { display: none; }
@@ -201,7 +210,7 @@ html, body {
 #title-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 20, 0.45);
+  background: transparent;
 }
 
 #title-text {
@@ -275,11 +284,12 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: brightness(0.7);
 }
 #name-input-bg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 30, 0.6);
+  background: transparent;
 }
 
 /* スライドコンテナ */
@@ -855,13 +865,8 @@ html, body {
 #dev-bg {
   position: absolute;
   inset: 0;
-  background: url('../assets/images/polytech_outside.png') center / cover no-repeat;
-}
-#dev-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: url('../assets/images/polytech_outside.webp') center / cover no-repeat;
+  filter: brightness(0.7);
 }
 
 #dev-content {
@@ -878,9 +883,8 @@ html, body {
 #dev-title {
   font-size: 72px;
   font-weight: bold;
-  color: #aad4ff;
+  color: #000;
   letter-spacing: 0.1em;
-  text-shadow: 0 0 30px rgba(100,200,255,0.6);
   flex-shrink: 0;
 }
 
@@ -889,15 +893,15 @@ html, body {
   width: 100%;
   max-width: 1400px;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.4);
-  border: 2px solid rgba(170,210,255,0.3);
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px solid rgba(0,0,0,0.15);
   border-radius: 20px;
   padding: 40px 60px;
 }
 
 #dev-text {
   font-size: 34px;
-  color: #cce8ff;
+  color: #000;
   line-height: 1.8;
   white-space: pre-wrap;
   font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;

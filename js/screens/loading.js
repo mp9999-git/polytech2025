@@ -119,18 +119,8 @@ class LoadingScreen {
   /** スタート処理 */
   _onStart() {
     if (!this._loaded) return;
-    // 非PCなら全画面リクエスト
-    if (!this._isPC()) {
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    }
     this._app.sound.requestWakeLock();
     this._app.goToTitle();
-  }
-
-  _isPC() {
-    return !(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
   }
 }
 

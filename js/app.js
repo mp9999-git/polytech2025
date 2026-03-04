@@ -58,8 +58,17 @@ class App {
 
   /** ローディング完了 → タイトルへ */
   goToTitle() {
+    if (!this._isPC()) {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    }
     this._showScreen('title');
     this._screens.title.show();
+  }
+
+  _isPC() {
+    return !(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
   }
 
   /** 新規ゲーム開始（全リセット） */
