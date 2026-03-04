@@ -71,9 +71,9 @@ class EndingScreen {
     const isGoodEnd = maxIntimacy >= GOOD_END_THRESHOLD;
 
     if (isGoodEnd) {
-      this._showGoodEnd(topCharIds, teacherNames, maxIntimacy);
+      this._showGoodEnd(topCharIds, teacherNames);
     } else {
-      this._showNormalEnd(topCharIds, teacherNames, maxIntimacy);
+      this._showNormalEnd(topCharIds, teacherNames);
     }
   }
 
@@ -84,7 +84,7 @@ class EndingScreen {
     this._el.classList.add('hidden');
   }
 
-  _showGoodEnd(topCharIds, teacherNames, maxIntimacy) {
+  _showGoodEnd(topCharIds, teacherNames) {
     this._bgImg.src = 'assets/images/ending_good.webp';
     this._app.sound.playBGM('ending_happy');
 
@@ -92,7 +92,7 @@ class EndingScreen {
     this._typeText.style.color = '#FF0000';
 
     // キャラクター表示（全員笑顔）
-    this._renderChars(topCharIds, teacherNames, maxIntimacy, true);
+    this._renderChars(topCharIds, teacherNames, this._app.state.intimacy, true);
 
     // 複数先生が同列の場合は全員のメッセージをランダム選択して \n で連結
     const playerName = this._app.state.playerName || '訓練生';
@@ -102,14 +102,17 @@ class EndingScreen {
       const tpl = patterns[Math.floor(Math.random() * patterns.length)] || '';
       return this._applyTemplate(tpl, { teacher: teacherName, player: playerName });
     });
-    this._startTyping(messages.join('\n'), this._msgText);
+    const principalPatterns = (this._messages.good || {}).principal || [];
+    const principalMsg = principalPatterns[Math.floor(Math.random() * principalPatterns.length)] || '';
+    const fullMsg = principalMsg ? messages.join('\n') + '\n' + principalMsg : messages.join('\n');
+    this._startTyping(fullMsg, this._msgText);
 
     // 紙吹雪
     setTimeout(() => this._confetti.start(), 500);
     this._confettiCanvas.style.display = 'block';
   }
 
-  _showNormalEnd(topCharIds, teacherNames, maxIntimacy) {
+  _showNormalEnd(topCharIds, teacherNames) {
     this._bgImg.src = 'assets/images/ending_normal.webp';
     this._app.sound.playBGM('ending_normal');
 
@@ -117,7 +120,7 @@ class EndingScreen {
     this._typeText.style.color = '#FF0000';
 
     // キャラクター表示（通常）
-    this._renderChars(topCharIds, teacherNames, maxIntimacy, false);
+    this._renderChars(topCharIds, teacherNames, this._app.state.intimacy, false);
 
     // normalはランダム選択
     const topName = teacherNames[topCharIds[0] - 1] || `先生${topCharIds[0]}`;
@@ -142,7 +145,7 @@ class EndingScreen {
 
       const nameLbl = document.createElement('div');
       nameLbl.className = 'ending-char-name';
-      nameLbl.textContent = `★ ${name}（親密度: ${this._app.state.intimacy[id] || 0}）`;
+      nameLbl.textContent = `★ ${name}（親密度: ${intimacy[id] || 0}）`;
 
       item.appendChild(img);
       item.appendChild(nameLbl);
