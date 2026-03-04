@@ -26,13 +26,19 @@ class DeveloperScreen {
     if (scrollArea) scrollArea.scrollTop = 0;
 
     if (!this._loaded) {
-      try {
-        const res  = await fetch('assets/data/developer_info.txt');
-        const text = await res.text();
-        this._textEl.textContent = text;
+      const cached = this._app.dataCache?.['assets/data/developer_info.txt'];
+      if (cached) {
+        this._textEl.textContent = cached;
         this._loaded = true;
-      } catch (e) {
-        this._textEl.textContent = '情報の読み込みに失敗しました。';
+      } else {
+        try {
+          const res  = await fetch('assets/data/developer_info.txt');
+          const text = await res.text();
+          this._textEl.textContent = text;
+          this._loaded = true;
+        } catch (e) {
+          this._textEl.textContent = '情報の読み込みに失敗しました。';
+        }
       }
     }
   }

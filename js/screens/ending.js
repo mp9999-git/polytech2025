@@ -43,13 +43,16 @@ class EndingScreen {
     this._el.classList.remove('hidden');
     this._el.classList.add('active');
 
-    // 初回のみ JSON を fetch してキャッシュ
+    // 初回のみ JSON を取得してキャッシュ
     if (!this._messages) {
-      try {
-        const res = await fetch('assets/data/messages_ending.json');
-        this._messages = await res.json();
-      } catch {
-        this._messages = { good: {}, normal: [] };
+      this._messages = this._app.dataCache?.['assets/data/messages_ending.json'] || null;
+      if (!this._messages) {
+        try {
+          const res = await fetch('assets/data/messages_ending.json');
+          this._messages = await res.json();
+        } catch {
+          this._messages = { good: {}, normal: [] };
+        }
       }
     }
 

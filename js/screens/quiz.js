@@ -121,13 +121,16 @@ class QuizScreen {
     // ローカル親密度をstateからコピー（クリア時のみstateに反映）
     this._localIntimacy = Object.assign({}, this._app.state.intimacy);
 
-    // 初回のみメッセージ JSON を fetch してキャッシュ
+    // 初回のみメッセージ JSON を取得してキャッシュ
     if (!this._messages) {
-      try {
-        const res = await fetch('assets/data/messages_quiz.json');
-        this._messages = await res.json();
-      } catch {
-        this._messages = { prompt: {}, correct: {}, wrong: {}, clear: {} };
+      this._messages = this._app.dataCache?.['assets/data/messages_quiz.json'] || null;
+      if (!this._messages) {
+        try {
+          const res = await fetch('assets/data/messages_quiz.json');
+          this._messages = await res.json();
+        } catch {
+          this._messages = { prompt: {}, correct: {}, wrong: {}, clear: {} };
+        }
       }
     }
 
@@ -158,6 +161,11 @@ class QuizScreen {
   async _loadQuestions(category) {
     if (this._questionsCache[category]) return this._questionsCache[category];
     const file = `assets/data/quiz_${category.toLowerCase()}.json`;
+    const cached = this._app.dataCache?.[file];
+    if (cached) {
+      this._questionsCache[category] = cached;
+      return cached;
+    }
     try {
       const res  = await fetch(file);
       const data = await res.json();

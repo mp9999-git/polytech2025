@@ -44,6 +44,19 @@ const AUDIO_ASSETS = [
   'assets/sounds/push_miss.mp3'
 ];
 
+const DATA_ASSETS = [
+  'assets/data/teacher_names.json',
+  'assets/data/messages_story.json',
+  'assets/data/messages_quiz.json',
+  'assets/data/messages_ending.json',
+  'assets/data/quiz_network.json',
+  'assets/data/quiz_plc.json',
+  'assets/data/quiz_database.json',
+  'assets/data/quiz_java.json',
+  'assets/data/quiz_android.json',
+  'assets/data/developer_info.txt'
+];
+
 class LoadingScreen {
   constructor(app) {
     this._app = app;
@@ -69,7 +82,8 @@ class LoadingScreen {
 
   /** 全アセット読み込み開始 */
   async _startLoading() {
-    const total = IMAGE_ASSETS.length + AUDIO_ASSETS.length;
+    this._app.dataCache = {};
+    const total = IMAGE_ASSETS.length + AUDIO_ASSETS.length + DATA_ASSETS.length;
     let loaded  = 0;
 
     const updateProgress = () => {
@@ -102,7 +116,17 @@ class LoadingScreen {
       aud.src = src;
     }));
 
-    await Promise.all([...imgPromises, ...audPromises]);
+    // データプリロード（JSON/テキストをキャッシュ）
+    const dataPromises = DATA_ASSETS.map(src => new Promise(resolve => {
+      const isTxt = src.endsWith('.txt');
+      fetch(src)
+        .then(res => isTxt ? res.text() : res.json())
+        .then(data => { this._app.dataCache[src] = data; })
+        .catch(() => {}) // 失敗しても続行
+        .finally(() => { updateProgress(); resolve(); });
+    }));
+
+    await Promise.all([...imgPromises, ...audPromises, ...dataPromises]);
     this._loaded = true;
     this._showTapOverlay();
   }

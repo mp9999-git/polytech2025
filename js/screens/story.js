@@ -64,13 +64,16 @@ class StoryScreen {
     // BGM
     this._app.sound.playBGM('introduction');
 
-    // 初回のみ JSON を fetch してキャッシュ
+    // 初回のみ JSON を取得してキャッシュ
     if (!this._scripts) {
-      try {
-        const res = await fetch('assets/data/messages_story.json');
-        this._scripts = await res.json();
-      } catch {
-        this._scripts = {};
+      this._scripts = this._app.dataCache?.['assets/data/messages_story.json'] || null;
+      if (!this._scripts) {
+        try {
+          const res = await fetch('assets/data/messages_story.json');
+          this._scripts = await res.json();
+        } catch {
+          this._scripts = {};
+        }
       }
     }
 

@@ -44,11 +44,14 @@ class NameInputScreen {
 
     // 先生名をJSONから読み込み
     if (!this._teacherNames) {
-      try {
-        const res = await fetch('assets/data/teacher_names.json');
-        this._teacherNames = await res.json();
-      } catch (e) {
-        this._teacherNames = [];
+      this._teacherNames = this._app.dataCache?.['assets/data/teacher_names.json'] || null;
+      if (!this._teacherNames) {
+        try {
+          const res = await fetch('assets/data/teacher_names.json');
+          this._teacherNames = await res.json();
+        } catch (e) {
+          this._teacherNames = [];
+        }
       }
     }
   }
