@@ -93,7 +93,8 @@ class LoadingScreen {
     const audPromises = AUDIO_ASSETS.map(src => new Promise(resolve => {
       const aud = new Audio();
       aud.preload = 'auto';
-      const done = () => { updateProgress(); resolve(); };
+      let settled = false;
+      const done = () => { if (settled) return; settled = true; updateProgress(); resolve(); };
       aud.addEventListener('canplaythrough', done, { once: true });
       aud.addEventListener('error', done, { once: true });
       // タイムアウト3秒でも続行
