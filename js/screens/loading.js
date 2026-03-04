@@ -4,10 +4,10 @@
  */
 
 const IMAGE_ASSETS = [
-  'assets/images/poly.webp',
-  'assets/images/haikei.webp',
   'assets/images/polytech_outside.webp',
   'assets/images/polytech_run.webp',
+  'assets/images/poly.webp',
+  'assets/images/haikei.webp',
   'assets/images/ending_good.webp',
   'assets/images/ending_normal.webp',
   'assets/images/teacher1.webp',

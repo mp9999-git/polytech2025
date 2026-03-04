@@ -187,8 +187,6 @@ class App {
 
   _initScaling() {
     this._applyScale();
-    // スケール適用後にフェードイン（初回レンダリングフラッシュ防止）
-    requestAnimationFrame(() => { this._container.style.opacity = '1'; });
     window.addEventListener('resize', () => this._applyScale());
     screen.orientation?.addEventListener('change', () => this._applyScale());
   }
