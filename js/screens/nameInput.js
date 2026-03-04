@@ -15,6 +15,14 @@ class NameInputScreen {
       this._onRegisterNext();
     });
 
+    // エンターキーで「登録して次へ」ボタンにフォーカス移動（スマホキーボードを閉じるため）
+    this._traineeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('btn-register-next').focus();
+      }
+    });
+
     document.getElementById('btn-start-game').addEventListener('click', () => {
       this._onStartGame();
     });
