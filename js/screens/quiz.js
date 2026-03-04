@@ -61,6 +61,8 @@ class QuizScreen {
 
     // メッセージキャッシュ
     this._messages = null;
+    // クイズデータキャッシュ（カテゴリ別）
+    this._questionsCache = {};
 
     // 選択肢ボタン
     this._choiceBtns.forEach(btn => {
@@ -103,6 +105,17 @@ class QuizScreen {
     this._el.classList.remove('hidden');
     this._el.classList.add('active');
     this._clearOverlay.classList.add('hidden');
+
+    // 画面表示直後に前の先生の残像をクリア
+    this._charImg.src = '';
+    this._charImg.style.opacity = '0';
+    this._teacherName.textContent = '';
+    this._msgText.textContent = '';
+    this._qText.textContent = '';
+    this._qNum.textContent = '';
+    this._nextBtn.classList.add('hidden');
+    this._choiceBtns.forEach(btn => { btn.style.visibility = 'hidden'; });
+
     this._app.sound.playBGM('quiz');
 
     // ローカル親密度をstateからコピー（クリア時のみstateに反映）
@@ -118,7 +131,7 @@ class QuizScreen {
       }
     }
 
-    // クイズデータ読み込み
+    // クイズデータ読み込み（カテゴリ別キャッシュ）
     const questions = await this._loadQuestions(category);
     // シャッフルして5問選択
     this._questions = this._shuffle(questions).slice(0, 5);
@@ -141,12 +154,15 @@ class QuizScreen {
     this._clearOverlay.classList.add('hidden');
   }
 
-  /** JSONから問題を読み込む */
+  /** JSONから問題を読み込む（カテゴリ別キャッシュ） */
   async _loadQuestions(category) {
+    if (this._questionsCache[category]) return this._questionsCache[category];
     const file = `assets/data/quiz_${category.toLowerCase()}.json`;
     try {
       const res  = await fetch(file);
-      return await res.json();
+      const data = await res.json();
+      this._questionsCache[category] = data;
+      return data;
     } catch (e) {
       console.warn('quiz: load failed', e);
       return [];
@@ -195,6 +211,7 @@ class QuizScreen {
     // キャラ（通常）
     this._charImg.src = `assets/images/teacher${charId}.webp`;
     this._charImg.style.opacity = '1';
+    this._choiceBtns.forEach(btn => { btn.style.visibility = 'visible'; });
 
     // 親密度（ローカル値を表示）
     const intimacy = this._localIntimacy[charId] || 0;

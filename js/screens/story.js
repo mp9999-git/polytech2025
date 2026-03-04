@@ -55,6 +55,12 @@ class StoryScreen {
     this._el.classList.remove('hidden');
     this._el.classList.add('active');
 
+    // 画面表示直後に前の先生の残像をクリア
+    this._charImg.style.visibility = 'hidden';
+    this._charImg.src = '';
+    this._teacherName.textContent = '';
+    this._msgText.textContent = '';
+
     // BGM
     this._app.sound.playBGM('introduction');
 
