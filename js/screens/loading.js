@@ -109,32 +109,54 @@ class LoadingScreen {
   /** 「タップしてスタート」オーバーレイ表示 */
   _showTapOverlay() {
     this._overlay.classList.remove('hidden');
-    this._overlay.addEventListener('click', () => this._onStart(), { once: true });
-    this._overlay.addEventListener('touchstart', (e) => {
+
+    // iOS Safari判定：スタンドアロンモード未起動なら使用方法ヒントを表示
+    if (this._isIOS() && !this._isStandalone()) {
+      this._showIOSHint();
+    }
+
+    // touchend: Android Chromeでフルスクリーンが最も確実に動作するイベント
+    this._overlay.addEventListener('touchend', (e) => {
       e.preventDefault();
+      // フルスクリーンをジェスチャー直結でインライン実行（コールスタックを最小化）
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
       this._onStart();
     }, { once: true, passive: false });
+
+    // clickはtouchendが発火しなかったPC/環境向けのフォールバック
+    this._overlay.addEventListener('click', () => {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
+      this._onStart();
+    }, { once: true });
   }
 
   /** スタート処理 */
   _onStart() {
     if (!this._loaded) return;
-    // Android Chromeはユーザー操作の直接コールスタック内でないと全画面が効かないためここで実行
-    this._requestFullscreen();
     this._app.sound.requestWakeLock();
     this._app.goToTitle();
   }
 
-  _requestFullscreen() {
-    const el = document.documentElement;
-    if (el.requestFullscreen) {
-      el.requestFullscreen().catch(() => {});
-    } else if (el.webkitRequestFullscreen) {
-      el.webkitRequestFullscreen();
-    }
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(() => {});
-    }
+  _isIOS() {
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (/Mac/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  }
+
+  _isStandalone() {
+    return window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches;
+  }
+
+  /** iOSでホーム画面追加を促すヒントを表示 */
+  _showIOSHint() {
+    const hint = document.getElementById('ios-hint');
+    if (hint) hint.classList.remove('hidden');
   }
 }
 

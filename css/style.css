@@ -179,6 +179,23 @@ html, body {
   letter-spacing: 0.05em;
 }
 
+#ios-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 16px;
+  padding: 24px 40px;
+  text-align: center;
+  font-size: 28px;
+  color: #fff;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+#ios-hint.hidden { display: none; }
+
 @keyframes pulse-text {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.5; }
