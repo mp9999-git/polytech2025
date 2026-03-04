@@ -13,29 +13,41 @@ class TitleScreen {
     this._animDuration = 11400; // ms（8000ms / 0.7 ≈ 11400ms、70%速度）
 
     document.getElementById('btn-continue').addEventListener('click', () => {
+      this._enterFullscreen();
       app.sound.playSE('button');
       app.continueGame();
     });
 
     document.getElementById('btn-newgame').addEventListener('click', () => {
+      this._enterFullscreen();
       app.sound.playSE('start');
       app.newGame();
     });
 
     document.getElementById('btn-dev-team').addEventListener('click', () => {
+      this._enterFullscreen();
       app.sound.playSE('button');
       app.goToDeveloper();
     });
 
     document.getElementById('btn-quiz-editor').addEventListener('click', () => {
+      this._enterFullscreen();
       app.sound.playSE('button');
       app.goToQuizEditor();
     });
 
     document.getElementById('btn-music-test').addEventListener('click', () => {
+      this._enterFullscreen();
       app.sound.playSE('button');
       app.goToMusicTest();
     });
+  }
+
+  _enterFullscreen() {
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
   }
 
   show() {

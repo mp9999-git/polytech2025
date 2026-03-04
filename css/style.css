@@ -334,7 +334,7 @@ html, body {
 }
 
 .name-card {
-  background: rgba(10, 20, 60, 0.9);
+  background: rgba(10, 20, 60, 0.8);
   border: 3px solid rgba(170, 210, 255, 0.6);
   border-radius: 30px;
   padding: 70px 90px;
@@ -886,16 +886,16 @@ html, body {
 }
 
 #dev-subtitle {
-  font-size: 40px;
+  font-size: 28px;
   font-weight: bold;
-  color: #000;
+  color: #fff;
   margin-bottom: 8px;
 }
 
 #dev-title {
-  font-size: 72px;
+  font-size: 50px;
   font-weight: bold;
-  color: #000;
+  color: #fff;
   letter-spacing: 0.1em;
 }
 
@@ -904,15 +904,15 @@ html, body {
   width: 100%;
   max-width: 1400px;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.7);
-  border: 2px solid rgba(255, 255, 255, 1.0);
+  background: rgba(10, 20, 60, 0.9);
+  border: 3px solid rgba(170, 210, 255, 0.6);
   border-radius: 20px;
   padding: 40px 60px;
 }
 
 #dev-text {
   font-size: 34px;
-  color: #000;
+  color: #fff;
   line-height: 1.8;
   white-space: pre-wrap;
   font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
