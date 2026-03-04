@@ -1,0 +1,159 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　Polytech Memorial
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【開発チームメンバー】
+  スマート制御システム科　生徒一同
+
+【Special Thanks】
+  ポリテクセンター　担当講師のみなさま
+  効果音提供：効果音ラボ
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【使用 AI・ツール】
+  IDE: Google Antigravity
+  IDE: Visual Studio Code
+  LLM: GEMINI 3.1 Pro
+  LLM: Claude Sonnet 4.6
+  楽曲生成: Suno V5（有料フランにて生成）
+  画像生成: NanoBananaPro
+  動画生成: veo 3.1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【開発日】
+  2026年3月3日
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【開発について】
+  本アプリの開発には、GeminiやClaudeなどの
+  大規模言語モデルを活用し、企画・設計から
+  実装・テストまでAIとペアプログラミング方式で
+  アジャイルに構築しました。
+
+  UIの調整、コードのリファクタリング、
+  データベースの構築に至るまで
+  AIが幅広くサポートしています。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【設計仕様書】
+
+■ アーキテクチャ
+  - 構成: サーバーレス静的Webアプリ（GitHub Pages対応）
+  - 言語: HTML5 / CSS3 / Vanilla JavaScript（ES Modules）
+  - フレームワーク: 不使用（依存ライブラリゼロ）
+  - モジュール構成:
+      app.js          ← メインコントローラー（画面遷移・スケーリング）
+      sound.js        ← SoundManager（BGM/SE/WakeLock）
+      storage.js      ← LocalStorageラッパー
+      confetti.js     ← 紙吹雪パーティクルエンジン（Canvas）
+      screens/*.js    ← 各画面クラス（9画面）
+
+■ 画面遷移設計
+  Loading
+    └→ Title
+         ├→ NameInput → Story → Quiz ──→ Story（次ステージ）
+         │                         └→ Ending
+         ├→ Developer（開発チーム）
+         ├→ QuizEditor（問題閲覧）
+         └→ MusicTest（音楽テスト）
+
+■ データ設計（LocalStorage）
+  キー: "PolytechMemorial"
+  構造:
+    playerName    : 訓練生名（文字列）
+    teacherNames  : 先生名配列（5要素）
+    intimacy      : 親密度マップ { 1〜5: 数値 }
+    progress      : ステージ進捗 { Network/PLC/..: {cleared} }
+    allCleared    : 全クリアフラグ（真偽値）
+
+■ メッセージシステム（外部JSON化）
+  assets/data/messages_quiz.json   ← クイズメッセージ（4種×5先生）
+  assets/data/messages_story.json  ← イントロ会話（5科目×5パターン）
+  assets/data/messages_ending.json ← エンディングメッセージ（5先生×5パターン）
+  ※ 初回アクセス時のみfetch、以降はインスタンスキャッシュで管理
+
+■ クイズシステム
+  - 科目ごとにJSONから最大100問をロード
+  - Fisher-Yatesシャッフルで5問を選択
+  - 選択肢（正解1 + 不正解2）もシャッフル
+  - 正解：親密度+1 / 不正解：親密度-1（最小0）
+  - 親密度はステージクリア時のみLocalStorageへ確定保存
+    （クリア前に戻るとロールバック）
+
+■ エンディング判定
+  GOOD END : いずれかの先生の親密度 ≥ 3
+  NORMAL END: 全先生の親密度 < 3
+  ※ タイトルへ戻ってもデータはリセットされない
+
+■ スケーリング設計
+  基準解像度: 1920 × 1080（固定）
+  方式: CSS transform: scale() によるレターボックス表示
+  対応: ウィンドウリサイズ・画面回転イベントで随時再計算
+
+■ 音声設計
+  BGM : HTMLAudioElement によるループ再生
+        （Visibility API / WakeLock API 連携）
+  SE  : Audio() の都度生成で多重再生対応
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【仕様概要】
+■ システム概要
+  - 対象: モダンブラウザ（スマートフォン・PC対応）
+  - 開発言語: HTML5 / CSS3 / JavaScript (ES Modules)
+  - データ永続化: LocalStorage
+  - GitHub Pages 対応（サーバーレス）
+
+■ 画面構成
+  - ローディング画面: 全アセット読み込み
+  - タイトル画面: ケンバーンズエフェクト背景
+  - 訓練生登録: 名前入力 + 先生名カスタマイズ
+  - ストーリー画面: キャラクター会話（タイピングアニメ）
+  - クイズ画面: 5科目 × 5問（3択・シャッフル対応）
+  - エンディング画面: GOOD END / NORMAL END
+  - 開発チーム画面: 本画面
+
+■ 5科目 クイズ
+  Network / PLC / Database / Java / Android
+  各科目 約100問から5問をランダム出題
+
+■ 親密度システム
+  正解：+1 ／ 不正解：-1
+  最高親密度 ≥ 3 → GOOD END
+
+■ BGM・SE
+  BGM: BGM担当者の楽曲 + SUNO V4 生成楽曲
+  SE: 効果音ラボ提供素材
+
+■ 解像度対応
+  基準解像度: 1920×1080
+  スマートフォン・PC のブラウザサイズに
+  合わせてスケーリング対応
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【日本語版ライセンス規定 / Japanese License Terms】
+
+著作権表示 / Copyright (c) 2024 mp (mp9999-git)
+
+本プロジェクト（修了制作）は、成果物の種類に応じて以下のライセンスを適用しています。
+
+1. ソースコード（プログラム）/ Source Code
+本プロジェクトのソースコードには「GNU General Public License v3.0 (GPL-3.0)」を適用します。
+- 複製、改変、再配布が可能ですが、これらを利用した二次的著作物を作成する場合、同じ GPL-3.0 ライセンスを適用し、ソースコードを公開する義務が生じます。
+- 詳細は、上記の英語原文（GPL-3.0）の規定に従うものとします。
+
+2. 音源・デザイン・画像（コンテンツ素材）/ Audio & Visual Assets
+本プロジェクトに含まれる音源（Suno AIにより生成され、作成者が商用権を保有するもの）、ロゴ、およびWebデザインについては「クリエイティブ・コモンズ 表示-非営利 4.0 国際 (CC BY-NC 4.0)」を適用します。
+- 非営利目的（Non-Commercial）に限り、作成者のクレジットを表示することで利用・共有が可能です。
+- 営利目的（商用利用）での使用、販売、および無断での転載・再配布は一切禁止します。
+- These audio and visual assets are licensed under CC BY-NC 4.0. Commercial use is strictly prohibited.
+
+免責事項 / Disclaimer
+本ソフトウェアおよびコンテンツは「現状のまま」提供され、明示または黙示を問わず、いかなる保証も行いません。
+This software and content are provided "as is", without warranty of any kind.
+

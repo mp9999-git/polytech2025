@@ -1,0 +1,15 @@
+# グローバルgitignoreの * ルールを解除（このリポジトリ専用）
+!*
+!*/
+!**/*
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/settings.json
+*.swp

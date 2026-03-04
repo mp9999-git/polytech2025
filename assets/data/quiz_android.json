@@ -1,0 +1,902 @@
+[
+  {
+    "q": "Androidアプリのビルドツールは？",
+    "a": "Gradle",
+    "choices": [
+      "Maven",
+      "Ant"
+    ],
+    "exp": "柔軟なビルド設定が可能です。"
+  },
+  {
+    "q": "アクティビティ間でデータを受け渡す際にIntentに格納するデータ構造は？",
+    "a": "Bundle (key-value)",
+    "choices": [
+      "List",
+      "Stack"
+    ],
+    "exp": "putExtraメソッドなどを使用します。"
+  },
+  {
+    "q": "UIコンポーネントのクリックイベントを処理するためのインターフェースは？",
+    "a": "OnClickListener",
+    "choices": [
+      "OnTouchListener",
+      "OnLongClickListener"
+    ],
+    "exp": "setOnClickListenerメソッドで登録します。"
+  },
+  {
+    "q": "長いリストデータを効率的に表示するための推奨コンポーネントは？",
+    "a": "RecyclerView",
+    "choices": [
+      "ListView",
+      "GridView"
+    ],
+    "exp": "ListViewの改良版で、柔軟性とパフォーマンスに優れます。"
+  },
+  {
+    "q": "リソースファイルで文字列を定義するファイルは？",
+    "a": "strings.xml",
+    "choices": [
+      "colors.xml",
+      "dimens.xml"
+    ],
+    "exp": "多言語対応（ローカライズ）のために重要です。"
+  },
+  {
+    "q": "アプリの設定値などを簡易に保存するための仕組みは？",
+    "a": "SharedPreferences",
+    "choices": [
+      "SQLite",
+      "File"
+    ],
+    "exp": "キーと値のペアで保存します。"
+  },
+  {
+    "q": "dp (density-independent pixel) とは何に基づいた単位か？",
+    "a": "画面密度",
+    "choices": [
+      "画面サイズ",
+      "フォントサイズ"
+    ],
+    "exp": "異なる解像度の端末で同じ物理サイズに見えるようにします。"
+  },
+  {
+    "q": "sp (scale-independent pixel) は主に何に使用するか？",
+    "a": "フォントサイズ",
+    "choices": [
+      "画像のサイズ",
+      "マージン"
+    ],
+    "exp": "ユーザーの文字サイズ設定が反映されます。"
+  },
+  {
+    "q": "非同期処理の結果をメインスレッド（UIスレッド）に反映させる必要があるのはなぜか？",
+    "a": "UI操作はメインスレッドからしか行えないため",
+    "choices": [
+      "処理速度を上げるため",
+      "メモリを節約するため"
+    ],
+    "exp": "別スレッドからUIを触るとクラッシュします。"
+  },
+  {
+    "q": "Fragmentのライフサイクルで、Viewが生成されるメソッドは？",
+    "a": "onCreateView()",
+    "choices": [
+      "onCreate()",
+      "onViewCreated()"
+    ],
+    "exp": "ここでレイアウトをインフレートします。"
+  },
+  {
+    "q": "Android 6.0 (API 23) から導入された権限管理の仕組みは？",
+    "a": "Runtime Permission（実行時パーミッション）",
+    "choices": [
+      "Install Permission",
+      "Admin Permission"
+    ],
+    "exp": "危険な権限は実行時にユーザーの許可が必要です。"
+  },
+  {
+    "q": "ConstraintLayoutの特徴は？",
+    "a": "制約ベースで柔軟なレイアウトが可能",
+    "choices": [
+      "縦横に並べるだけ",
+      "表形式で配置する"
+    ],
+    "exp": "ネストを浅くできるメリットがあります。"
+  },
+  {
+    "q": "画像リソースを配置するフォルダは？",
+    "a": "res/drawable",
+    "choices": [
+      "res/layout",
+      "res/values"
+    ],
+    "exp": "mipmapはアプリアイコン用です。"
+  },
+  {
+    "q": "ログを出力するためのクラスは？",
+    "a": "Log",
+    "choices": [
+      "System.out",
+      "Print"
+    ],
+    "exp": "Log.d()やLog.e()などを使用します。"
+  },
+  {
+    "q": "Androidにおける「Toast」とは何か？",
+    "a": "短時間表示される簡易メッセージ",
+    "choices": [
+      "朝食のパン",
+      "設定画面"
+    ],
+    "exp": "ユーザー操作へのフィードバックによく使われます。"
+  },
+  {
+    "q": "Androidアプリの最小APIレベルを指定するものは？",
+    "a": "minSdkVersion",
+    "choices": [
+      "targetSdkVersion",
+      "compileSdkVersion"
+    ],
+    "exp": "アプリが動作する最低限のAndroidバージョンを指定します。"
+  },
+  {
+    "q": "AndroidのViewのライフサイクルで「onDraw()」はどの役割か？",
+    "a": "カスタムビューの描画処理を実装するメソッド",
+    "choices": [
+      "Viewの初期化",
+      "Viewのアニメーション"
+    ],
+    "exp": "Canvasに描画処理を記述します。"
+  },
+  {
+    "q": "Androidの「ViewBinding」の利点は？",
+    "a": "layout XMLとコードを安全に紐付けNullPointerExceptionを防ぐ",
+    "choices": [
+      "動的なレイアウト変更が容易",
+      "レイアウトを暗号化する"
+    ],
+    "exp": "findViewByIdより型安全にビューを参照できます。"
+  },
+  {
+    "q": "AndroidのJetpack Composeとは？",
+    "a": "Kotlinの宣言型UIフレームワーク",
+    "choices": [
+      "XMLベースのレイアウトツール",
+      "データベース管理ライブラリ"
+    ],
+    "exp": "@Composable関数でUIを構築するモダンなAndroid UI手法です。"
+  },
+  {
+    "q": "Androidの「LiveData」の特徴は？",
+    "a": "ライフサイクルを考慮した観察可能なデータホルダー",
+    "choices": [
+      "固定値を返すデータ",
+      "データを暗号化するクラス"
+    ],
+    "exp": "UIのライフサイクルに合わせてUIを自動更新します。"
+  },
+  {
+    "q": "AndroidのJetpack「ViewModel」の役割は？",
+    "a": "画面回転などの設定変更後もデータを保持するUI用データ管理クラス",
+    "choices": [
+      "データベースの操作",
+      "APIとの通信"
+    ],
+    "exp": "Activityが再生成されてもViewModelは破棄されません。"
+  },
+  {
+    "q": "AndroidのRoom Databaseとは？",
+    "a": "SQLiteのORM（Jetpackライブラリ）",
+    "choices": [
+      "クラウドデータベース",
+      "ドキュメント型DB"
+    ],
+    "exp": "アノテーションベースでDAO、Entity、Databaseを定義します。"
+  },
+  {
+    "q": "AndroidのRoomで「Entity」は何を表すか？",
+    "a": "データベースのテーブル（行データクラス）",
+    "choices": [
+      "データベース接続オブジェクト",
+      "クエリの結果"
+    ],
+    "exp": "@Entityアノテーションを付けたデータクラスです。"
+  },
+  {
+    "q": "AndroidのRoomで「DAO」の役割は？",
+    "a": "データベースへのアクセスメソッドを定義するインタフェース",
+    "choices": [
+      "データの暗号化",
+      "UIの更新"
+    ],
+    "exp": "@Insert、@Query、@Deleteなどのアノテーションを使います。"
+  },
+  {
+    "q": "AndroidのJetpack「Navigation Component」の役割は？",
+    "a": "画面遷移を一元管理するフレームワーク",
+    "choices": [
+      "GPSナビゲーション",
+      "ネットワーク通信の制御"
+    ],
+    "exp": "NavGraphでアプリの画面遷移を視覚的に定義できます。"
+  },
+  {
+    "q": "AndroidのWork Managerとは？",
+    "a": "保証された遅延実行・定期実行のバックグラウンドタスク管理",
+    "choices": [
+      "リアルタイム処理専用",
+      "UIスレッドの管理"
+    ],
+    "exp": "端末が再起動しても実行を保証します。"
+  },
+  {
+    "q": "Androidの「Paging Library」の目的は？",
+    "a": "大量のデータをページ単位で段階的に読み込む",
+    "choices": [
+      "PDF表示",
+      "画面をページ遷移させる"
+    ],
+    "exp": "RecyclerViewと組み合わせてよく使われます。"
+  },
+  {
+    "q": "Androidの「DataStore」とは？",
+    "a": "SharedPreferencesの後継となるKotlinコルーチンベースの設定保存API",
+    "choices": [
+      "ファイルストレージ",
+      "クラウドストレージ"
+    ],
+    "exp": "PreferencesDataStoreとProtoDataStoreの2種類があります。"
+  },
+  {
+    "q": "Androidのコルーチン（Coroutines）の利点は？",
+    "a": "非同期処理をシンプルな同期的コードスタイルで記述できる",
+    "choices": [
+      "マルチスレッドが不要になる",
+      "UIスレッドで全て実行できる"
+    ],
+    "exp": "suspend関数とscope（CoroutineScope）で制御します。"
+  },
+  {
+    "q": "Androidのコルーチンの「Dispatcher」の役割は？",
+    "a": "コルーチンを実行するスレッドプールを指定する",
+    "choices": [
+      "エラーを処理する",
+      "コルーチンの優先度を設定する"
+    ],
+    "exp": "Dispatchers.IO、Dispatchers.Main、Dispatchers.Defaultなどがあります。"
+  },
+  {
+    "q": "AndroidのKotlin「Flow」とは？",
+    "a": "非同期ストリームデータを処理するコルーチンAPIの仕組み",
+    "choices": [
+      "状態の一時保存API",
+      "ネットワーク通信ライブラリ"
+    ],
+    "exp": "LiveDataに代わる多機能な観察可能データストリームです。"
+  },
+  {
+    "q": "AndroidのRefreshでSwipeRefreshLayoutの役割は？",
+    "a": "プルダウン操作でリフレッシュ処理を呼び出すビュー",
+    "choices": [
+      "FABの配置",
+      "スクロールバーの表示"
+    ],
+    "exp": "setOnRefreshListenerでリフレッシュ時の処理を実装します。"
+  },
+  {
+    "q": "AndroidのDependency Injection（DI）ライブラリとして代表的なものは？",
+    "a": "Hilt / Dagger",
+    "choices": [
+      "Retrofit",
+      "Glide"
+    ],
+    "exp": "HiltはDagger2をベースにシンプル化したJetpackのDIライブラリです。"
+  },
+  {
+    "q": "Android のネットワーク通信ライブラリ「Retrofit」の特徴は？",
+    "a": "REST APIをインタフェースで定義してHTTP通信を簡潔に実装できる",
+    "choices": [
+      "FTPのみ対応",
+      "データベース接続に使う"
+    ],
+    "exp": "OkHttpと組み合わせてよく使われます。"
+  },
+  {
+    "q": "Android の画像ロードライブラリの代表例は？",
+    "a": "Glide / Picasso / Coil",
+    "choices": [
+      "Retrofit",
+      "Gson"
+    ],
+    "exp": "URLからの非同期画像読み込みとキャッシュを自動化します。"
+  },
+  {
+    "q": "AndroidのJSONパースライブラリとして有名なものは？",
+    "a": "Gson / Moshi",
+    "choices": [
+      "Glide",
+      "Retrofit"
+    ],
+    "exp": "RetrofitのConverterFactoryとして使うことが多いです。"
+  },
+  {
+    "q": "AndroidのProGuardの役割は？",
+    "a": "コードの難読化・縮小・最適化を行うビルドツール",
+    "choices": [
+      "ユニットテストを実行する",
+      "依存ライブラリを管理する"
+    ],
+    "exp": "R8がProGuardの後継として現在推奨されています。"
+  },
+  {
+    "q": "AndroidのマルチモジュールProject構成の利点は？",
+    "a": "ビルド速度の向上と関心の分離が可能",
+    "choices": [
+      "シンプルなプロジェクト構成",
+      "テストが不要になる"
+    ],
+    "exp": "変更があったモジュールのみ再ビルドされるため効率的です。"
+  },
+  {
+    "q": "Androidのアプリアーキテクチャで「Clean Architecture」の特徴は？",
+    "a": "UI・ドメイン・データの3層を明確に分離する",
+    "choices": [
+      "単一クラスに全て書く",
+      "MVCのみ使う"
+    ],
+    "exp": "テスタビリティと保守性が高いアーキテクチャです。"
+  },
+  {
+    "q": "AndroidのMVVMパターンで「VM（ViewModel）」の役割は？",
+    "a": "UIロジックとビジネスロジックを分離してUIに状態を提供",
+    "choices": [
+      "データベースを直接操作する",
+      "ネットワーク通信のみ担当する"
+    ],
+    "exp": "ViewはViewModelを観察し、データの変化に応じてUIを更新します。"
+  },
+  {
+    "q": "AndroidのActivity「onSaveInstanceState()」の役割は？",
+    "a": "画面回転などでActivity再生成前にデータを保存する",
+    "choices": [
+      "アクティビティを終了する",
+      "ネットワーク状態を保存する"
+    ],
+    "exp": "Bundleに保存した値をonCreate()のsavedInstanceStateで取得します。"
+  },
+  {
+    "q": "AndroidでSQLiteデータベースのバージョンアップ時に呼ばれるメソッドは？",
+    "a": "onUpgrade()",
+    "choices": [
+      "onCreate()",
+      "onStart()"
+    ],
+    "exp": "DATABASE_VERSIONを上げると自動的に呼ばれます。"
+  },
+  {
+    "q": "AndroidのContentProviderの役割は？",
+    "a": "アプリ間でデータを安全に共有するための仕組み",
+    "choices": [
+      "UIのデータバインディング",
+      "ネットワーク通信"
+    ],
+    "exp": "連絡先や写真などのシステムデータへのアクセスに使います。"
+  },
+  {
+    "q": "AndroidのBroadcastReceiverの役割は？",
+    "a": "システムや他アプリが発行するブロードキャストイベントを受信する",
+    "choices": [
+      "アクティビティ間のデータ転送",
+      "データベースにアクセスする"
+    ],
+    "exp": "電池残量変化・電話着信などのイベントを受け取れます。"
+  },
+  {
+    "q": "AndroidのServiceの役割は？",
+    "a": "バックグラウンドで長時間処理を実行するコンポーネント",
+    "choices": [
+      "UIを表示するコンポーネント",
+      "データを保存するコンポーネント"
+    ],
+    "exp": "音楽再生やファイルダウンロードなどに使います。"
+  },
+  {
+    "q": "AndroidのForegroundServiceとBackgroundServiceの違いは？",
+    "a": "ForegroundServiceはユーザーに通知を表示しながら実行される",
+    "choices": [
+      "機能は同じ",
+      "BackgroundServiceの方が優先度が高い"
+    ],
+    "exp": "Android 8.0以降はバックグラウンドサービスの制限が強化されました。"
+  },
+  {
+    "q": "AndroidのJobSchedulerの役割は？",
+    "a": "特定条件（Wi-Fi接続時など）でジョブを実行するスケジューラ",
+    "choices": [
+      "UIアニメーションのスケジューラ",
+      "データベースの定期バックアップ"
+    ],
+    "exp": "Android 5.0以降から利用可能です。WorkManagerの内部でも使われます。"
+  },
+  {
+    "q": "Android の「APK」とは何か？",
+    "a": "Androidアプリのインストールパッケージファイル",
+    "choices": [
+      "ソースコードファイル",
+      "設定ファイル形式"
+    ],
+    "exp": "Android PacKageの略でzip形式で構成されています。"
+  },
+  {
+    "q": "Android の「AAB（Android App Bundle）」とは？",
+    "a": "Google Playが端末に合わせた最適なAPKを生成するための配布形式",
+    "choices": [
+      "Apkと同じ",
+      "デバッグ専用ファイル"
+    ],
+    "exp": "App BundleでAPKサイズを削減できます。"
+  },
+  {
+    "q": "Android の「ProGuard / R8」でmappingファイルの役割は？",
+    "a": "難読化後のクラス・メソッド名と元名の対応表でクラッシュ解析に使う",
+    "choices": [
+      "ソースコードの一覧",
+      "テスト結果の記録"
+    ],
+    "exp": "Firebase Crashlyticsなどでデシンボルするときに使用します。"
+  },
+  {
+    "q": "AndroidのUI テストフレームワーク「Espresso」の特徴は？",
+    "a": "Androidの実機・エミュレータ上でUIの操作や検証を自動化できる",
+    "choices": [
+      "ユニットテスト専用",
+      "APIのモックを作る"
+    ],
+    "exp": "onView()でビューを指定しperform()で操作します。"
+  },
+  {
+    "q": "Androidのユニットテストで使われるフレームワークは？",
+    "a": "JUnit / Mockito",
+    "choices": [
+      "Espresso",
+      "Robolectric"
+    ],
+    "exp": "Mockitoでモックオブジェクトを作成して依存性を排除します。"
+  },
+  {
+    "q": "AndroidのRobolectricの特徴は？",
+    "a": "エミュレータなしでJVM上でAndroidコードをテストできるフレームワーク",
+    "choices": [
+      "実機テスト専用",
+      "UIテスト専用"
+    ],
+    "exp": "Android APIをJVMで模擬して高速テストを実現します。"
+  },
+  {
+    "q": "Androidのダークモード対応で使用するリソース修飾子は？",
+    "a": "res/values-night/",
+    "choices": [
+      "res/values-dark/",
+      "res/values-black/"
+    ],
+    "exp": "nightモード用のcolors.xmlを配置して自動切り替えが可能です。"
+  },
+  {
+    "q": "Androidアプリへのキーボードの表示方法を制御するマニフェスト属性は？",
+    "a": "android:windowSoftInputMode",
+    "choices": [
+      "android:keyboard",
+      "android:inputMode"
+    ],
+    "exp": "stateHidden, adjustResizeなどの値で動作を制御します。"
+  },
+  {
+    "q": "Androidの「Spannable」の用途は？",
+    "a": "TextViewのテキスト一部にスタイルやリンクを適用する",
+    "choices": [
+      "画像を表示する",
+      "リストを表示する"
+    ],
+    "exp": "SpannableStringやSpannedを使って文字装飾を実現します。"
+  },
+  {
+    "q": "AndroidのCoil（Kotlin Image Loading）ライブラリの特徴は？",
+    "a": "Kotlinコルーチンで構築された軽量な画像ロードライブラリ",
+    "choices": [
+      "Java専用ライブラリ",
+      "動画専用ライブラリ"
+    ],
+    "exp": "Glideと比べてコードが簡潔でKotlinと親和性が高いです。"
+  },
+  {
+    "q": "Android の「Jetpack Security」ライブラリの用途は？",
+    "a": "EncryptedSharedPreferencesなど暗号化データストレージの提供",
+    "choices": [
+      "ネットワークセキュリティ",
+      "ユーザー認証の実装"
+    ],
+    "exp": "AES256+GCMで安全にデータを保存できます。"
+  },
+  {
+    "q": "Android の「BiometricPrompt」の役割は？",
+    "a": "指紋・顔認証など生体認証UIを提供するJetpackAPI",
+    "choices": [
+      "カメラ撮影API",
+      "PIN認証のみを提供"
+    ],
+    "exp": "Android 6.0以降の生体認証に対応します。"
+  },
+  {
+    "q": "Androidのカメラ操作で推奨されるJetpackライブラリは？",
+    "a": "CameraX",
+    "choices": [
+      "Camera1 API",
+      "Camera2 API"
+    ],
+    "exp": "高レベルAPIで簡単に撮影・プレビューが実装できます。"
+  },
+  {
+    "q": "Androidの「ExoPlayer」の用途は？",
+    "a": "動画・音声ストリーミング再生を実現するライブラリ",
+    "choices": [
+      "画像の表示・加工",
+      "ファイルの暗号化"
+    ],
+    "exp": "HLSやDASHなど各種ストリーミング形式に対応します。"
+  },
+  {
+    "q": "AndroidのGoogleサインインのライブラリは？",
+    "a": "Google Sign-In SDK / Credential Manager",
+    "choices": [
+      "Firebase Auth SDK",
+      "OkHttp"
+    ],
+    "exp": "Android 14以降はCredential Managerへの移行が推奨されます。"
+  },
+  {
+    "q": "Androidアプリのクラッシュ分析に使われるGoogle Firebaseサービスは？",
+    "a": "Firebase Crashlytics",
+    "choices": [
+      "Firebase Firestore",
+      "Firebase Remote Config"
+    ],
+    "exp": "リアルタイムでクラッシュ情報を収集・解析できます。"
+  },
+  {
+    "q": "Android の Build Variantsとは？",
+    "a": "debug/releaseやflavor（製品バリアント）を組み合わせたビルド構成",
+    "choices": [
+      "テーマのバリエーション",
+      "言語のバリエーション"
+    ],
+    "exp": "複数のアプリバージョン（フリー版・有料版等）を1つのプロジェクトから生成できます。"
+  },
+  {
+    "q": "AndroidのGradle KTS（Kotlin Script）とは？",
+    "a": "build.gradleをGroovyではなくKotlinで記述する方式",
+    "choices": [
+      "Javaのみ使えるビルドスクリプト",
+      "CI/CDのスクリプト"
+    ],
+    "exp": "IDEの補完や型安全な記述が可能になります。"
+  },
+  {
+    "q": "AndroidのVersion Catalogとは？",
+    "a": "libs.versions.tomlで依存ライブラリのバージョンを一元管理する仕組み",
+    "choices": [
+      "アプリのバージョン管理",
+      "Google Playのバージョン"
+    ],
+    "exp": "複数モジュールで同じライブラリバージョンを共有できます。"
+  },
+  {
+    "q": "Androidの「Application」クラスの用途は？",
+    "a": "アプリ全体のライフサイクルを管理しグローバルな初期化処理を行う",
+    "choices": [
+      "ActivityのBase",
+      "バックグラウンドサービスの親クラス"
+    ],
+    "exp": "Hiltの@HiltAndroidAppなどもApplicationを継承させます。"
+  },
+  {
+    "q": "Android Studioのプロファイラ（Profiler）の機能は？",
+    "a": "CPU・メモリ・ネットワーク・バッテリの使用状況をリアルタイム計測",
+    "choices": [
+      "コードの静的解析",
+      "ユニットテストの実行"
+    ],
+    "exp": "パフォーマンスのボトルネックを発見するのに役立ちます。"
+  },
+  {
+    "q": "Androidの「ANR（Application Not Responding）」とは？",
+    "a": "メインスレッドが5秒以上ブロックされた際に表示されるエラーダイアログ",
+    "choices": [
+      "クラッシュとの同じ",
+      "メモリ不足エラー"
+    ],
+    "exp": "重い処理はコルーチンやExecutorServiceで非同期化します。"
+  },
+  {
+    "q": "AndroidのGPS位置情報取得で使う推奨APIは？",
+    "a": "FusedLocationProviderClient（Googleの統合位置情報API）",
+    "choices": [
+      "raw GPS APIのみ",
+      "WifiManager"
+    ],
+    "exp": "GPS・Wi-Fi・セルネットワークを自動選択して精度と省電力を両立します。"
+  },
+  {
+    "q": "Androidのスクロール制御で「NestedScrollView」の特徴は？",
+    "a": "スクロールビューをネストできる（ScrollView内でRecyclerViewなど）",
+    "choices": [
+      "横スクロール専用",
+      "インフィニットスクロール専用"
+    ],
+    "exp": "CollapsingToolbarLayoutなどと組み合わせてよく使います。"
+  },
+  {
+    "q": "Androidの「Notification Channel」はいつから必須になったか？",
+    "a": "Android 8.0（API 26）以降",
+    "choices": [
+      "Android 5.0（API 21）",
+      "Android 7.0（API 24）"
+    ],
+    "exp": "通知を送る前にcreateNotificationChannelを呼ぶ必要があります。"
+  },
+  {
+    "q": "Androidの「MotionLayout」の特徴は？",
+    "a": "ConstraintLayoutを拡張しアニメーションとビュー遷移を宣言的に定義",
+    "choices": [
+      "ScrollView専用レイアウト",
+      "物理シミュレーション専用"
+    ],
+    "exp": "MotionSceneのXMLで開始・終了状態とトランジションを定義します。"
+  },
+  {
+    "q": "Androidの「AppBar」の構成に使われるコンポーネントは？",
+    "a": "Toolbar / CollapsingToolbarLayout + AppBarLayout",
+    "choices": [
+      "StatusBar",
+      "DrawerLayout"
+    ],
+    "exp": "CoordinatorLayoutと組み合わせてスクロール連動動作を実現します。"
+  },
+  {
+    "q": "Androidの「FloatingActionButton（FAB）」の用途は？",
+    "a": "画面の主要なアクションを1つのボタンで提供するUI部品",
+    "choices": [
+      "ツールバーのボタン",
+      "リストアイテムのボタン"
+    ],
+    "exp": "Material Designのコンポーネントの一つです。"
+  },
+  {
+    "q": "AndroidのSnackbarとToastの違いは？",
+    "a": "Snackbarはアクション（UNDOなど）を追加でき表示位置を制御できる",
+    "choices": [
+      "Toastの方が機能が豊富",
+      "機能は同じ"
+    ],
+    "exp": "SnackbarはAndroid Material Designのコンテキスト通知コンポーネントです。"
+  },
+  {
+    "q": "AndroidのBottomNavigationViewの用途は？",
+    "a": "画面下部に3〜5個のメインナビゲーションタブを表示するUI部品",
+    "choices": [
+      "ドロワーナビゲーション",
+      "ツールバーのタブ"
+    ],
+    "exp": "Googleのアプリで多く採用されているナビゲーションパターンです。"
+  },
+  {
+    "q": "Androidの「TabLayout + ViewPager2」の組み合わせの用途は？",
+    "a": "タブ切り替えとスワイプで複数の画面を表示するUI",
+    "choices": [
+      "動画のスライドショー",
+      "画像ギャラリー"
+    ],
+    "exp": "FragmentStateAdapter(or RecyclerView.Adapter)でページを提供します。"
+  },
+  {
+    "q": "Androidでメモリリークの原因として多いのは？",
+    "a": "非staticなInner ClassがActivityの参照を持ち続けること",
+    "choices": [
+      "大きな画像を表示すること",
+      "ループを使うこと"
+    ],
+    "exp": "LeakCanaryというライブラリでメモリリークを検出できます。"
+  },
+  {
+    "q": "Android の「ContentResolver」の役割は？",
+    "a": "ContentProviderへのアクセスを仲介するクラス",
+    "choices": [
+      "DBへの直接アクセス",
+      "ファイル読み込み専門クラス"
+    ],
+    "exp": "query()、insert()、update()、delete()メソッドでデータを操作します。"
+  },
+  {
+    "q": "Androidのパーミッショングループで「危険な権限」の例は？",
+    "a": "カメラ・位置情報・連絡先・マイク",
+    "choices": [
+      "インターネット通信",
+      "バイブレーション"
+    ],
+    "exp": "これらは実行時パーミッション（Runtime Permission）が必要です。"
+  },
+  {
+    "q": "AndroidのAPKのコード署名（Code Signing）の目的は？",
+    "a": "開発者の正当性を証明しアプリの改ざんを防ぐ",
+    "choices": [
+      "APKを圧縮する",
+      "難読化を強化する"
+    ],
+    "exp": "Google Playへのアップロードには署名が必須です。"
+  },
+  {
+    "q": "Androidの「Target API Level」を最新に保つことの重要性は？",
+    "a": "新しいセキュリティ要件・プライバシー制限への対応とGoogle Playの要件充足",
+    "choices": [
+      "パフォーマンスが上がるだけ",
+      "古いデバイスへの対応が容易になる"
+    ],
+    "exp": "Google PlayはTargetSdkVersionの最低ラインを定期的に引き上げます。"
+  },
+  {
+    "q": "Androidの「Adaptive Icon」とは？",
+    "a": "端末・ランチャーの形状に応じてアイコンが自動適応する仕組み",
+    "choices": [
+      "アニメーションアイコン",
+      "動的に色が変わるアイコン"
+    ],
+    "exp": "Android 8.0から導入され、前景・背景の2レイヤーで構成されます。"
+  },
+  {
+    "q": "Android の「Implicit Intent」と「Explicit Intent」の違いは？",
+    "a": "ImplicitはアクションでコンポーネントをOS側が決め、Explicitはクラスを直接指定する",
+    "choices": [
+      "機能は同じ",
+      "ExplicitがWeb URL向け"
+    ],
+    "exp": "外部アプリ連携にはImplicit Intentが便利です。"
+  },
+  {
+    "q": "Android の「Deep Link」とは？",
+    "a": "URLやIntentフィルタでアプリの特定画面を直接開く仕組み",
+    "choices": [
+      "Webサイトへのリンク",
+      "アプリのバックグラウンド起動"
+    ],
+    "exp": "プッシュ通知やWeb連携でよく使われます。"
+  },
+  {
+    "q": "Android の「Baseline Profile」とは？",
+    "a": "起動やシングルユーザー処理を事前にコンパイルしてパフォーマンスを向上させる仕組み",
+    "choices": [
+      "デバッグ用のビルド設定",
+      "ユーザープロフィール管理"
+    ],
+    "exp": "Jetpack Macrobenchmarkライブラリと合わせて使います。"
+  },
+  {
+    "q": "AndroidのマルチスクリーンサポートでFold対応に使うAPIは？",
+    "a": "Jetpack Window Manager",
+    "choices": [
+      "ConstraintLayout",
+      "Display API"
+    ],
+    "exp": "折りたたみ端末の展開状態を検知してUIを適応させます。"
+  },
+  {
+    "q": "Android の「App Startup Library」の役割は？",
+    "a": "アプリ起動時の初期化処理を効率化してコールドスタートを高速化",
+    "choices": [
+      "スプラッシュスクリーンの表示",
+      "バックグラウンドタスクの管理"
+    ],
+    "exp": "ContentProviderを使った初期化を統合して起動オーバーヘッドを削減します。"
+  },
+  {
+    "q": "Android の「SplashScreen API」（Android 12以降）の特徴は？",
+    "a": "スプラッシュスクリーンの表示を標準化するAPIが追加された",
+    "choices": [
+      "既存の実装から変更なし",
+      "スプラッシュスクリーンが廃止された"
+    ],
+    "exp": "Jetpack SplashScreenでAndroid 12未満にもバックポートできます。"
+  },
+  {
+    "q": "Androidのデバッグで「Android Debug Bridge（ADB）」の役割は？",
+    "a": "PCから端末・エミュレータを操作するコマンドラインツール",
+    "choices": [
+      "アプリのビルドツール",
+      "クラッシュ解析ツール"
+    ],
+    "exp": "adb install、adb logcatなどのコマンドが使えます。"
+  },
+  {
+    "q": "Androidでアプリのバックアップ対象を除外するための設定は？",
+    "a": "xml/backup_rules.xmlでbackup=false、fullBackupContent設定",
+    "choices": [
+      "SharedPreferencesを使う",
+      "SQLiteを使わない"
+    ],
+    "exp": "プライバシーやセキュリティ上バックアップしてはいけないデータを除外します。"
+  },
+  {
+    "q": "Androidのビルドバリアント（Build Variant）とは何か？",
+    "a": "Build TypeとProduct Flavorを組み合わせたビルド構成",
+    "choices": [
+      "単一のビルド設定",
+      "Gradleのバージョン設定"
+    ],
+    "exp": "debug/releaseなどのBuild TypeとfreeやpaidなどのFlavorを掛け合わせます。"
+  },
+  {
+    "q": "Androidの「Foreground Service」と通常のServiceの違いは？",
+    "a": "Foreground Serviceは通知バーに常駐し、システムに優先的に扱われる",
+    "choices": [
+      "機能に差はない",
+      "Foreground Serviceはバックグラウンドでのみ動作する"
+    ],
+    "exp": "音楽再生や位置情報取得など継続的な処理に使います。"
+  },
+  {
+    "q": "Androidで「PendingIntent」を使う場面は？",
+    "a": "通知や外部アプリから自アプリのIntentを後から実行させたい場合",
+    "choices": [
+      "即時IntentをUIスレッドで実行する",
+      "バックグラウンド処理を開始する"
+    ],
+    "exp": "通知のタップ時やAlarmManagerでよく使われます。"
+  },
+  {
+    "q": "Android Keystoreシステムの主な目的は？",
+    "a": "暗号鍵をセキュアなハードウェア領域に保存して保護する",
+    "choices": [
+      "アプリのキャッシュを管理する",
+      "ビルドキーを管理する"
+    ],
+    "exp": "鍵がアプリのメモリに露出せずセキュリティが高まります。"
+  },
+  {
+    "q": "AndroidのR8/ProGuardの主な目的は？",
+    "a": "コードの難読化・最適化・未使用コードの削除（シュリンク）",
+    "choices": [
+      "デバッグログを有効化する",
+      "APKを圧縮する"
+    ],
+    "exp": "リリースビルドでAPKサイズ削減とリバースエンジニアリング対策に使います。"
+  },
+  {
+    "q": "Android Studioの「Lint」ツールの役割は？",
+    "a": "コードの潜在的なバグや非推奨APIの使用を静的解析で検出する",
+    "choices": [
+      "ユニットテストを実行する",
+      "パフォーマンスをプロファイリングする"
+    ],
+    "exp": "ビルド前に問題を発見して品質を高めます。"
+  },
+  {
+    "q": "AndroidのManifestファイル（AndroidManifest.xml）に記述するものは？",
+    "a": "アプリの構成要素・パーミッション・ハードウェア要件など",
+    "choices": [
+      "UIのレイアウト",
+      "Gradleの依存関係"
+    ],
+    "exp": "Activityやサービスの宣言、インターネット権限の指定などを記述します。"
+  },
+  {
+    "q": "Android の「WorkManager」でタスクに制約（Constraints）を設けられる条件はどれか？",
+    "a": "ネットワーク接続・充電中・アイドル状態・ストレージ空きなど",
+    "choices": [
+      "CPUコア数のみ指定できる",
+      "タスクの実行順序のみ指定できる"
+    ],
+    "exp": "Constraints.Builderで条件を組み合わせて信頼性の高いバックグラウンドタスクを定義します。"
+  }
+]

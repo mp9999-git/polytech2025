@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Polytech Memorial</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ゲームラッパー（黒背景・スケーリング基点） -->
+<div id="game-wrapper">
+  <div id="game-container">
+
+    <!-- ===== ローディング画面 ===== -->
+    <div id="screen-loading" class="screen active">
+      <div id="loading-bg-overlay"></div>
+      <div id="loading-text-area">
+        <p id="loading-message">データを読み込み中...</p>
+        <div id="loading-progress-bar-wrap"><div id="loading-progress-bar"></div></div>
+      </div>
+      <img id="loading-gif" src="assets/images/polytech_run.webp" alt="">
+      <!-- 読み込み完了後に表示 -->
+      <div id="loading-tap-overlay" class="hidden">
+        <p id="tap-to-start-text">タップしてスタート</p>
+        <p id="recommend-landscape">スマートフォンは横画面を推奨します</p>
+      </div>
+    </div>
+
+    <!-- ===== タイトル画面 ===== -->
+    <div id="screen-title" class="screen hidden">
+      <div id="title-bg-wrap">
+        <img id="title-bg" src="assets/images/poly.webp" alt="">
+      </div>
+      <div id="title-overlay"></div>
+      <h1 id="title-text">Polytech Memorial</h1>
+      <div id="title-buttons-wrap">
+        <div id="title-buttons">
+          <button class="title-btn" id="btn-newgame">はじめから</button>
+          <button class="title-btn" id="btn-continue">つづきから</button>
+          <button class="title-btn" id="btn-quiz-editor">問題閲覧</button>
+          <button class="title-btn" id="btn-music-test">音楽テスト</button>
+          <button class="title-btn" id="btn-dev-team">開発チーム</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 名前入力画面 ===== -->
+    <div id="screen-name-input" class="screen hidden">
+      <div id="name-input-bg-wrap">
+        <img id="name-input-bg" src="assets/images/polytech_outside.webp" alt="">
+        <div id="name-input-bg-overlay"></div>
+      </div>
+      <!-- スライドコンテナ（訓練生名入力 + 先生名入力が横並び） -->
+      <div id="name-input-slide-container">
+        <!-- フェーズ1: 訓練生名入力 -->
+        <div id="phase-trainee" class="name-phase">
+          <div class="name-card">
+            <h2 class="name-card-title">訓練生登録</h2>
+            <p class="name-card-desc">訓練生として登録する名前を入力してください</p>
+            <input type="text" id="trainee-name-input" class="name-text-input" placeholder="例：ポリテク太郎" maxlength="20">
+            <button id="btn-register-next" class="name-btn-primary">登録して次へ</button>
+          </div>
+        </div>
+        <!-- フェーズ2: 先生名入力 -->
+        <div id="phase-teachers" class="name-phase">
+          <div class="name-card">
+            <h2 class="name-card-title">先生たちの名前</h2>
+            <p class="name-card-desc">担当の先生たちの名前を入力してください</p>
+            <div id="teacher-name-fields">
+              <div class="teacher-name-row">
+                <span class="teacher-label">先生1（Network）</span>
+                <input type="text" class="teacher-name-input" data-id="1" placeholder="先生1" maxlength="20">
+              </div>
+              <div class="teacher-name-row">
+                <span class="teacher-label">先生2（PLC）</span>
+                <input type="text" class="teacher-name-input" data-id="2" placeholder="先生2" maxlength="20">
+              </div>
+              <div class="teacher-name-row">
+                <span class="teacher-label">先生3（Database）</span>
+                <input type="text" class="teacher-name-input" data-id="3" placeholder="先生3" maxlength="20">
+              </div>
+              <div class="teacher-name-row">
+                <span class="teacher-label">先生4（Java）</span>
+                <input type="text" class="teacher-name-input" data-id="4" placeholder="先生4" maxlength="20">
+              </div>
+              <div class="teacher-name-row">
+                <span class="teacher-label">先生5（Android）</span>
+                <input type="text" class="teacher-name-input" data-id="5" placeholder="先生5" maxlength="20">
+              </div>
+            </div>
+            <button id="btn-start-game" class="name-btn-primary">決定して開始</button>
+          </div>
+        </div>
+      </div>
+      <img id="name-input-gif" src="assets/images/polytech_run.webp" alt="">
+      <button class="btn-back-to-title" id="name-back-btn">スタートへ戻る</button>
+    </div>
+
+    <!-- ===== ストーリー画面 ===== -->
+    <div id="screen-story" class="screen hidden">
+      <div id="story-bg-wrap">
+        <img id="story-bg" src="assets/images/haikei.webp" alt="">
+        <div id="story-bg-overlay"></div>
+      </div>
+      <img id="story-char" class="story-char-img" src="" alt="">
+      <div id="story-msg-window">
+        <div id="story-msg-header">
+          <span id="story-teacher-name"></span>
+        </div>
+        <div id="story-msg-body">
+          <p id="story-msg-text"></p>
+        </div>
+        <button id="btn-story-next" class="story-next-btn">次へ ▶</button>
+      </div>
+      <button class="btn-back-to-title" id="story-back-btn">スタートへ戻る</button>
+    </div>
+
+    <!-- ===== クイズ画面 ===== -->
+    <div id="screen-quiz" class="screen hidden">
+      <div id="quiz-bg-wrap">
+        <img id="quiz-bg" src="assets/images/haikei.webp" alt="">
+        <div id="quiz-bg-overlay"></div>
+      </div>
+      <!-- 左エリア: キャラクター + 親密度 -->
+      <div id="quiz-left">
+        <div id="quiz-intimacy-display">
+          <span id="quiz-intimacy-label">親密度：</span>
+          <span id="quiz-intimacy-value">0</span>
+        </div>
+        <img id="quiz-char" class="quiz-char-img" src="" alt="">
+        <!-- 親密度エフェクト -->
+        <div id="intimacy-effect" class="hidden"></div>
+        <!-- 紙吹雪Canvas -->
+        <canvas id="confetti-canvas"></canvas>
+      </div>
+      <!-- 右エリア -->
+      <div id="quiz-right">
+        <!-- 問題文 -->
+        <div id="quiz-question-card">
+          <div id="quiz-q-num"></div>
+          <div id="quiz-question-text"></div>
+        </div>
+        <!-- 選択肢 -->
+        <div id="quiz-choices">
+          <button class="quiz-choice-btn" data-idx="0"></button>
+          <button class="quiz-choice-btn" data-idx="1"></button>
+          <button class="quiz-choice-btn" data-idx="2"></button>
+        </div>
+        <!-- メッセージウィンドウ -->
+        <div id="quiz-msg-window">
+          <div id="quiz-msg-header">
+            <span id="quiz-teacher-name"></span>
+          </div>
+          <div id="quiz-msg-body">
+            <p id="quiz-msg-text"></p>
+          </div>
+          <button id="btn-quiz-next" class="quiz-next-btn hidden">次へ ▶</button>
+        </div>
+      </div>
+      <!-- ステージクリアオーバーレイ -->
+      <div id="quiz-clear-overlay" class="hidden">
+        <div id="quiz-clear-text">ステージクリア！</div>
+      </div>
+      <button class="btn-back-to-title" id="quiz-back-btn">スタートへ戻る</button>
+    </div>
+
+    <!-- ===== エンディング画面 ===== -->
+    <div id="screen-ending" class="screen hidden">
+      <div id="ending-bg-wrap">
+        <img id="ending-bg" src="" alt="">
+      </div>
+      <div id="ending-chars-container"></div>
+      <div id="ending-type-text"></div>
+      <div id="ending-msg-window">
+        <div id="ending-msg-body">
+          <p id="ending-msg-text"></p>
+        </div>
+        <button id="btn-ending-title" class="ending-btn">タイトルへ戻る</button>
+      </div>
+      <canvas id="ending-confetti-canvas"></canvas>
+    </div>
+
+    <!-- ===== 問題閲覧モード画面 ===== -->
+    <div id="screen-quiz-editor" class="screen hidden">
+      <div id="qe-bg"></div>
+      <div id="qe-content">
+        <h2 id="qe-title">問題閲覧モード</h2>
+        <div id="qe-tabs">
+          <button class="qe-tab-btn active" data-cat="Network">Network</button>
+          <button class="qe-tab-btn" data-cat="PLC">PLC</button>
+          <button class="qe-tab-btn" data-cat="Database">Database</button>
+          <button class="qe-tab-btn" data-cat="Java">Java</button>
+          <button class="qe-tab-btn" data-cat="Android">Android</button>
+        </div>
+        <div id="qe-question-list">
+          <p id="qe-loading">読み込み中...</p>
+        </div>
+      </div>
+      <button class="btn-back-to-title" id="qe-back-btn">スタートへ戻る</button>
+    </div>
+
+    <!-- ===== 音楽テスト画面 ===== -->
+    <div id="screen-music-test" class="screen hidden">
+      <div id="mt-bg"></div>
+      <div id="mt-content">
+        <h2 id="mt-title">音楽テスト</h2>
+        <p class="mt-section-title">BGM</p>
+        <div class="mt-track-list" id="mt-bgm-list"></div>
+        <p class="mt-section-title">SE（効果音）</p>
+        <div class="mt-track-list" id="mt-se-list"></div>
+      </div>
+      <button class="btn-back-to-title" id="mt-back-btn">スタートへ戻る</button>
+    </div>
+
+    <!-- ===== 開発チーム画面 ===== -->
+    <div id="screen-developer" class="screen hidden">
+      <div id="dev-bg"></div>
+      <div id="dev-content">
+        <h2 id="dev-title">開発チーム</h2>
+        <div id="dev-scroll-area">
+          <pre id="dev-text"></pre>
+        </div>
+      </div>
+      <button class="btn-back-to-title" id="dev-back-btn">スタートへ戻る</button>
+    </div>
+
+    <!-- トーストメッセージ -->
+    <div id="game-toast" class="hidden"></div>
+
+  </div><!-- /#game-container -->
+</div><!-- /#game-wrapper -->
+
+<!-- 音声要素（非表示） -->
+<audio id="bgm-player" loop></audio>
+<audio id="se-start" src="assets/sounds/push_start.mp3" preload="auto"></audio>
+<audio id="se-button" src="assets/sounds/push_button.mp3" preload="auto"></audio>
+<audio id="se-success" src="assets/sounds/push_success.mp3" preload="auto"></audio>
+<audio id="se-miss" src="assets/sounds/push_miss.mp3" preload="auto"></audio>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
