@@ -301,7 +301,7 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.7);
+  filter: brightness(0.8);
 }
 #name-input-bg-overlay {
   position: absolute;
@@ -866,7 +866,7 @@ html, body {
   position: absolute;
   inset: 0;
   background: url('../assets/images/polytech_outside.webp') center / cover no-repeat;
-  filter: brightness(0.7);
+  filter: brightness(0.8);
 }
 
 #dev-content {
