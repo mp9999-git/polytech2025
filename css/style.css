@@ -835,10 +835,6 @@ html, body {
   border-top: 4px solid rgba(170, 210, 255, 0.5);
   padding: 30px 60px 36px;
   z-index: 20;
-  min-height: 260px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
 #ending-msg-body { overflow-y: auto; max-height: 160px; }
@@ -850,19 +846,6 @@ html, body {
   white-space: pre-wrap;
 }
 
-.ending-btn {
-  align-self: flex-end;
-  padding: 20px 60px;
-  font-size: 38px;
-  font-weight: bold;
-  color: #fff;
-  background: rgba(20, 40, 120, 0.9);
-  border: 3px solid rgba(170, 210, 255, 0.6);
-  border-radius: 50px;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-.ending-btn:hover { background: rgba(40, 80, 180, 0.9); transform: scale(1.04); }
 
 #ending-confetti-canvas {
   position: absolute;
