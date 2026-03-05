@@ -305,14 +305,14 @@ html, body {
   bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.75);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 16px;
-  padding: 24px 40px;
+  background: rgba(0, 0, 0, 0.80);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 20px;
+  padding: 32px 56px;
   text-align: center;
-  font-size: 28px;
+  font-size: 38px;
   color: #fff;
-  line-height: 1.8;
+  line-height: 1.9;
   white-space: nowrap;
 }
 #ios-hint.hidden { display: none; }
