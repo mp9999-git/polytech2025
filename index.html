@@ -108,7 +108,10 @@
                 <input type="text" class="teacher-name-input" data-id="5" placeholder="先生5" maxlength="20">
               </div>
             </div>
-            <button id="btn-start-game" class="name-btn-primary">決定して開始</button>
+            <div id="teacher-btn-row">
+              <button id="btn-shuffle-teachers" class="name-btn-shuffle">🎲 シャッフル</button>
+              <button id="btn-start-game" class="name-btn-primary">決定して開始</button>
+            </div>
           </div>
         </div>
       </div>
@@ -235,14 +238,92 @@
     <!-- ===== 開発チーム画面 ===== -->
     <div id="screen-developer" class="screen hidden">
       <div id="dev-bg"></div>
+      <canvas id="dev-particles"></canvas>
+
       <div id="dev-content">
-        <div id="dev-title-area">
-          <h2 id="dev-title">ポリテクセンター 修了課題作品</h2>
+        <!-- ヘッダー -->
+        <div id="dev-header">
+          <div id="dev-header-label">▶ CREDITS</div>
+          <h1 id="dev-main-title">Polytech Memorial</h1>
+          <p id="dev-sub-title">ポリテクセンター &nbsp;|&nbsp; スマート制御システム科 修了課題作品</p>
+          <div id="dev-title-line"></div>
         </div>
-        <div id="dev-scroll-area">
+
+        <!-- カードグリッド -->
+        <div id="dev-grid">
+
+          <!-- チームカード -->
+          <div class="dev-card" id="dev-card-team">
+            <div class="dev-card-header">
+              <span class="dev-card-icon">👥</span>
+              <span class="dev-card-title">DEVELOPMENT TEAM</span>
+            </div>
+            <div class="dev-card-body">
+              <p class="dev-team-main">スマート制御システム科</p>
+              <p class="dev-team-sub">生徒一同</p>
+            </div>
+          </div>
+
+          <!-- Special Thanksカード -->
+          <div class="dev-card" id="dev-card-thanks">
+            <div class="dev-card-header">
+              <span class="dev-card-icon">🙏</span>
+              <span class="dev-card-title">SPECIAL THANKS</span>
+            </div>
+            <div class="dev-card-body">
+              <p class="dev-thanks-item">ポリテクセンター 担当講師の皆様</p>
+              <p class="dev-thanks-item">効果音提供：効果音ラボ 様</p>
+            </div>
+          </div>
+
+          <!-- Tech Stackカード -->
+          <div class="dev-card" id="dev-card-tech">
+            <div class="dev-card-header">
+              <span class="dev-card-icon">🛠</span>
+              <span class="dev-card-title">TECH STACK</span>
+            </div>
+            <div class="dev-card-body">
+              <div class="dev-badges">
+                <span class="dev-badge dev-badge-lang">HTML5</span>
+                <span class="dev-badge dev-badge-lang">CSS3</span>
+                <span class="dev-badge dev-badge-lang">JavaScript</span>
+                <span class="dev-badge dev-badge-ai">Claude Sonnet</span>
+                <span class="dev-badge dev-badge-ai">Gemini</span>
+                <span class="dev-badge dev-badge-media">Suno V5</span>
+                <span class="dev-badge dev-badge-platform">GitHub Pages</span>
+                <span class="dev-badge dev-badge-platform">VS Code</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- リリースカード -->
+          <div class="dev-card" id="dev-card-release">
+            <div class="dev-card-header">
+              <span class="dev-card-icon">📅</span>
+              <span class="dev-card-title">RELEASE</span>
+            </div>
+            <div class="dev-card-body">
+              <p class="dev-release-date">2026年 3月 3日</p>
+              <p class="dev-release-note">GitHub Pages にて公開</p>
+            </div>
+          </div>
+
+        </div><!-- /#dev-grid -->
+
+        <!-- 詳細テキストエリア -->
+        <div id="dev-detail-area">
+          <div id="dev-detail-label">▶ DETAIL / SPEC</div>
           <pre id="dev-text"></pre>
         </div>
-      </div>
+
+        <!-- フッター -->
+        <div id="dev-footer">
+          <p id="dev-copyright">© 2026 mp (mp9999-git) &nbsp;—&nbsp; GPL-3.0 / CC BY-NC 4.0</p>
+          <p id="dev-powered">Powered by AI × Human Pair Programming</p>
+        </div>
+
+      </div><!-- /#dev-content -->
+
       <button class="btn-back-to-title" id="dev-back-btn">スタートへ戻る</button>
     </div>
 

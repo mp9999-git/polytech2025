@@ -476,11 +476,12 @@ class QuizScreen {
   }
 
   _skipTyping() {
+    if (!this._isTyping()) return;
+    // _stopTyping()を呼ぶ前に参照を保存（stopTypingがnullにするため）
+    const el   = this._typingEl;
+    const full = this._typingFull;
     this._stopTyping();
-    if (this._typingEl && this._typingFull) {
-      this._typingEl.textContent = this._typingFull;
-    }
-    this._typingEl = null;
+    if (el && full) el.textContent = full;
   }
 
   _stopTyping() {

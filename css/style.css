@@ -160,6 +160,8 @@ html, body {
   background: rgba(0,0,0,0.6);
   border-radius: 24px;
   backdrop-filter: blur(4px);
+  /* 中央より上方に配置（読み込み完了テキストとの重なりを回避） */
+  margin-bottom: 200px;
 }
 
 #loading-tap-overlay.hidden { display: none; }
@@ -236,7 +238,7 @@ html, body {
 
 #ios-hint {
   position: absolute;
-  bottom: 40px;
+  bottom: 220px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.75);
@@ -405,18 +407,18 @@ html, body {
   background: rgba(10, 20, 60, 0.8);
   border: 3px solid rgba(170, 210, 255, 0.6);
   border-radius: 30px;
-  padding: 70px 90px;
+  padding: 56px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 36px;
-  max-width: 900px;
+  gap: 24px;
+  max-width: 1020px;
   width: 100%;
   box-shadow: 0 10px 60px rgba(0,0,80,0.8);
 }
 
 .name-card-title {
-  font-size: 64px;
+  font-size: 56px;
   font-weight: bold;
   color: #aad4ff;
   letter-spacing: 0.06em;
@@ -424,7 +426,7 @@ html, body {
 }
 
 .name-card-desc {
-  font-size: 34px;
+  font-size: 30px;
   color: #cce8ff;
   text-align: center;
   line-height: 1.6;
@@ -445,8 +447,8 @@ html, body {
 .name-text-input:focus { border-color: #4fc3f7; background: rgba(255,255,255,0.18); }
 
 .name-btn-primary {
-  padding: 28px 80px;
-  font-size: 44px;
+  padding: 22px 60px;
+  font-size: 38px;
   font-weight: bold;
   color: #fff;
   background: linear-gradient(135deg, #1565c0, #0d47a1);
@@ -456,6 +458,7 @@ html, body {
   transition: transform 0.1s, box-shadow 0.2s;
   box-shadow: 0 6px 30px rgba(0,0,100,0.6);
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 .name-btn-primary:hover {
   transform: translateY(-3px) scale(1.04);
@@ -463,26 +466,56 @@ html, body {
 }
 .name-btn-primary:active { transform: scale(0.97); }
 
+/* 先生名画面 ボタン行（横並び固定） */
+#teacher-btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+}
+
+/* シャッフルボタン */
+.name-btn-shuffle {
+  padding: 22px 48px;
+  font-size: 36px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 6px 30px rgba(0, 80, 0, 0.5);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.name-btn-shuffle:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 10px 40px rgba(30, 160, 60, 0.5);
+}
+.name-btn-shuffle:active { transform: scale(0.97); }
+
 /* 先生名入力フィールド */
 #teacher-name-fields {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .teacher-name-row {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
   min-width: 0;
 }
 
 .teacher-label {
-  font-size: 32px;
+  font-size: 28px;
   color: #aad4ff;
-  min-width: 320px;
+  min-width: 270px;
   text-align: left;
   white-space: nowrap;
 }
@@ -490,8 +523,8 @@ html, body {
 .teacher-name-input {
   flex: 1;
   min-width: 0;
-  padding: 18px 24px;
-  font-size: 36px;
+  padding: 12px 20px;
+  font-size: 30px;
   background: rgba(255,255,255,0.1);
   border: 2px solid rgba(170,210,255,0.4);
   border-radius: 12px;
@@ -924,19 +957,29 @@ html, body {
 }
 
 /* ========================================================
-   開発チーム画面
+   開発チーム画面（リニューアル版）
    ======================================================== */
 #screen-developer {
-  background: #050510;
+  background: #020818;
 }
 
+/* 背景写真（暗くぼかす） */
 #dev-bg {
   position: absolute;
   inset: 0;
   background: url('../assets/images/polytech_outside.webp') center / cover no-repeat;
-  filter: brightness(0.8);
+  filter: brightness(0.25) blur(4px);
 }
 
+/* パーティクルキャンバス */
+#dev-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* メインコンテンツ領域 */
 #dev-content {
   position: absolute;
   inset: 0;
@@ -944,46 +987,258 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 60px 100px 100px;
-  gap: 40px;
+  padding: 50px 80px 120px;
+  gap: 36px;
+  overflow-y: auto;
 }
 
-#dev-title-area {
+/* ---- ヘッダー ---- */
+#dev-header {
   text-align: center;
   flex-shrink: 0;
+  animation: dev-fade-down 0.7s ease both;
 }
 
-#dev-subtitle {
-  font-size: 28px;
-  font-weight: bold;
+#dev-header-label {
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  color: #60b8ff;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+#dev-main-title {
+  font-size: 80px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #ffffff 0%, #a0d8ff 50%, #60b8ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  margin: 0 0 12px;
+  line-height: 1;
+}
+
+#dev-sub-title {
+  font-size: 26px;
+  color: rgba(180, 220, 255, 0.85);
+  letter-spacing: 0.05em;
+  margin: 0 0 20px;
+}
+
+#dev-title-line {
+  width: 200px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #60b8ff, transparent);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* ---- カードグリッド ---- */
+#dev-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 28px;
+  width: 100%;
+  max-width: 1500px;
+  flex-shrink: 0;
+  animation: dev-fade-up 0.8s 0.2s ease both;
+}
+
+/* 共通カードスタイル（グラスモーフィズム） */
+.dev-card {
+  background: rgba(10, 25, 70, 0.65);
+  border: 1px solid rgba(100, 180, 255, 0.35);
+  border-radius: 24px;
+  padding: 36px 44px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 80, 200, 0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.dev-card:hover {
+  border-color: rgba(100, 180, 255, 0.7);
+  box-shadow: 0 8px 40px rgba(0, 100, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* カードヘッダー */
+.dev-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(100, 180, 255, 0.25);
+}
+.dev-card-icon {
+  font-size: 34px;
+  line-height: 1;
+}
+.dev-card-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #60b8ff;
+  text-transform: uppercase;
+}
+
+/* カードボディ */
+.dev-card-body {
+  color: rgba(220, 240, 255, 0.9);
+}
+
+/* チームカード */
+#dev-card-team {
+  grid-column: 1;
+  grid-row: 1;
+}
+.dev-team-main {
+  font-size: 32px;
+  font-weight: 700;
   color: #fff;
   margin-bottom: 8px;
 }
-
-#dev-title {
-  font-size: 50px;
-  font-weight: bold;
-  color: #fff;
-  letter-spacing: 0.1em;
+.dev-team-sub {
+  font-size: 26px;
+  color: rgba(180, 220, 255, 0.8);
 }
 
-#dev-scroll-area {
-  flex: 1;
+/* Special Thanksカード */
+#dev-card-thanks {
+  grid-column: 2;
+  grid-row: 1;
+}
+.dev-thanks-item {
+  font-size: 26px;
+  margin-bottom: 10px;
+  padding-left: 18px;
+  position: relative;
+}
+.dev-thanks-item::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #60b8ff;
+}
+
+/* Tech Stackカード（横長） */
+#dev-card-tech {
+  grid-column: 1 / 3;
+  grid-row: 2;
+}
+.dev-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.dev-badge {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border: 2px solid;
+}
+.dev-badge-lang {
+  background: rgba(0, 100, 220, 0.3);
+  border-color: rgba(80, 160, 255, 0.6);
+  color: #a0d0ff;
+}
+.dev-badge-ai {
+  background: rgba(120, 0, 200, 0.3);
+  border-color: rgba(180, 80, 255, 0.6);
+  color: #d0a0ff;
+}
+.dev-badge-media {
+  background: rgba(0, 150, 100, 0.3);
+  border-color: rgba(0, 220, 150, 0.6);
+  color: #80ffcc;
+}
+.dev-badge-platform {
+  background: rgba(180, 100, 0, 0.3);
+  border-color: rgba(255, 160, 50, 0.6);
+  color: #ffc880;
+}
+
+/* リリースカード */
+#dev-card-release {
+  grid-column: 1 / 3;
+  grid-row: 3;
+}
+.dev-release-date {
+  font-size: 36px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.dev-release-note {
+  font-size: 24px;
+  color: rgba(180, 220, 255, 0.7);
+}
+
+/* ---- 詳細テキストエリア ---- */
+#dev-detail-area {
   width: 100%;
-  max-width: 1400px;
-  overflow-y: auto;
-  background: rgba(10, 20, 60, 0.9);
-  border: 3px solid rgba(170, 210, 255, 0.6);
-  border-radius: 20px;
-  padding: 40px 60px;
+  max-width: 1500px;
+  flex-shrink: 0;
+  animation: dev-fade-up 0.8s 0.35s ease both;
+}
+
+#dev-detail-label {
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  color: #60b8ff;
+  font-weight: 700;
+  margin-bottom: 16px;
 }
 
 #dev-text {
-  font-size: 34px;
-  color: #fff;
-  line-height: 1.8;
+  width: 100%;
+  background: rgba(10, 25, 70, 0.55);
+  border: 1px solid rgba(100, 180, 255, 0.25);
+  border-radius: 20px;
+  padding: 36px 44px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 26px;
+  color: rgba(200, 230, 255, 0.85);
+  line-height: 1.9;
   white-space: pre-wrap;
   font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  box-sizing: border-box;
+}
+
+/* ---- フッター ---- */
+#dev-footer {
+  text-align: center;
+  flex-shrink: 0;
+  animation: dev-fade-up 0.8s 0.4s ease both;
+}
+#dev-copyright {
+  font-size: 22px;
+  color: rgba(140, 190, 255, 0.6);
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+#dev-powered {
+  font-size: 20px;
+  color: rgba(100, 160, 255, 0.5);
+  font-style: italic;
+  letter-spacing: 0.08em;
+}
+
+/* アニメーション */
+@keyframes dev-fade-down {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes dev-fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ========================================================

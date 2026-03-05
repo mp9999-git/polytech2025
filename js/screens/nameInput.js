@@ -32,6 +32,11 @@ class NameInputScreen {
       }
     });
 
+    document.getElementById('btn-shuffle-teachers').addEventListener('click', () => {
+      this._app.sound.playSE('button');
+      this._shuffleTeacherNames();
+    });
+
     document.getElementById('btn-start-game').addEventListener('click', () => {
       this._onStartGame();
     });
@@ -109,6 +114,18 @@ class NameInputScreen {
         const idx  = Math.floor(Math.random() * pool.length);
         input.value = pool.splice(idx, 1)[0] || `先生${i + 1}`;
       }
+    });
+  }
+
+  /** シャッフルボタン: 保存値を無視して常にランダム生成 */
+  _shuffleTeacherNames() {
+    const GENDER_MAP = ['male', 'male', 'male', 'female', 'male'];
+    const malePool   = [...(this._teacherNames?.male   || [])];
+    const femalePool = [...(this._teacherNames?.female || [])];
+    this._teacherInputs.forEach((input, i) => {
+      const pool = GENDER_MAP[i] === 'male' ? malePool : femalePool;
+      const idx  = Math.floor(Math.random() * pool.length);
+      input.value = pool.splice(idx, 1)[0] || `先生${i + 1}`;
     });
   }
 
