@@ -60,6 +60,9 @@ class App {
     // スケーリング初期化（ウィンドウサイズに合わせて拡縮）
     this._initScaling();
 
+    // スワイプ・ピンチをタップと誤認識しないようフィルタリング
+    this._initGestureFilter();
+
     // 全画面モードが解除されたときにスケールを再計算
     document.addEventListener('fullscreenchange', () => this._onFullscreenChange());
     document.addEventListener('webkitfullscreenchange', () => this._onFullscreenChange());
@@ -245,6 +248,50 @@ class App {
       if (!this.state.progress[stage]?.cleared) return stage;
     }
     return null; // 全クリア
+  }
+
+  // ---- ジェスチャーフィルター ----
+
+  /**
+   * スワイプ・ピンチ操作をタップ/ボタン操作として誤認識しないようにする
+   * touchstart で起点を記録し、touchmove で移動量やタッチ本数を監視する
+   * 閾値（10px）を超えるか複数タッチが検出された場合は
+   * キャプチャフェーズで touchend を止め、後続の click 合成も抑制する
+   */
+  _initGestureFilter() {
+    const THRESHOLD = 10; // px: この距離以上動いたらスワイプとみなす
+    let startX       = 0;
+    let startY       = 0;
+    let startTouches = 0;
+    let blockEnd     = false;
+
+    document.addEventListener('touchstart', (e) => {
+      blockEnd     = false;
+      startX       = e.touches[0].clientX;
+      startY       = e.touches[0].clientY;
+      startTouches = e.touches.length;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      // ピンチ（複数タッチ）はジェスチャーとして扱う
+      if (e.touches.length > 1 || startTouches > 1) {
+        blockEnd = true;
+        return;
+      }
+      // 移動量が閾値を超えたらスワイプとみなす
+      const dx = Math.abs(e.touches[0].clientX - startX);
+      const dy = Math.abs(e.touches[0].clientY - startY);
+      if (dx > THRESHOLD || dy > THRESHOLD) blockEnd = true;
+    }, { passive: true });
+
+    // キャプチャフェーズで捕捉 → ボタン等のリスナーより先に実行
+    document.addEventListener('touchend', (e) => {
+      if (blockEnd) {
+        e.preventDefault();         // click の合成を抑制
+        e.stopImmediatePropagation(); // 後続リスナーをすべて止める
+        blockEnd = false;
+      }
+    }, { passive: false, capture: true });
   }
 
   // ---- スケーリング ----
