@@ -23,6 +23,7 @@ import EndingScreen       from './screens/ending.js';
 import DeveloperScreen    from './screens/developer.js';
 import QuizEditorScreen   from './screens/quizEditor.js';
 import MusicTestScreen    from './screens/musicTest.js';
+import SplashScreen      from './screens/splash.js';
 
 // ステージをクリアする順番（この順でストーリー→クイズが進む）
 const STAGE_ORDER = ['Network', 'PLC', 'Database', 'Java', 'Android'];
@@ -41,6 +42,7 @@ class App {
 
     // 各画面クラスのインスタンスを生成して登録
     this._screens = {
+      splash:     new SplashScreen(this),
       loading:    new LoadingScreen(this),
       title:      new TitleScreen(this),
       nameInput:  new NameInputScreen(this),
@@ -65,6 +67,12 @@ class App {
 
   /** アプリ開始 */
   start() {
+    this._showScreen('splash');
+    this._screens.splash.show();
+  }
+
+  /** スプラッシュ → ローディング画面へ */
+  goToLoading() {
     this._showScreen('loading');
     this._screens.loading.show();
   }
