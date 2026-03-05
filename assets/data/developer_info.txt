@@ -7,19 +7,26 @@
 
 【Special Thanks】
   ポリテクセンター　担当講師のみなさま
-  効果音提供：効果音ラボ　様
+  効果音：効果音ラボ　様
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-【使用 AI・ツール】
-  IDE: Google Antigravity
-  IDE: Visual Studio Code
-  LLM: GEMINI 3.1 Pro
+【使用ツール】
+◆生成AI
   LLM: Claude Sonnet 4.6
-  楽曲生成: Suno V5（有料フランにて生成）
-  画像生成: NanoBananaPro
+  LLM: GEMINI 3.1 Pro
+  楽曲生成: Suno V5（公開に向けた著作権取得のため有料フランを使用）
+  画像生成: NanoBanana Pro
   動画生成: veo 3.1
 
+◆Webアプリ開発
+  IDE: Visual Studio Code
+  Web公開: GitHub Pages 
+
+◆Androidアプリ開発
+  IDE: Google Antigravity
+  IDE: Google Android Studio
+  
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 【開発日】
@@ -39,7 +46,7 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-【仕様概要】
+【仕様概要(Web版)】
 ■ システム概要
   - 対象: モダンブラウザ（スマートフォン・PC対応）
   - 開発言語: HTML5 / CSS3 / JavaScript (ES Modules)
@@ -51,9 +58,14 @@
   - タイトル画面: ケンバーンズエフェクト背景
   - 訓練生登録: 名前入力 + 先生名カスタマイズ
   - ストーリー画面: キャラクター会話（タイピングアニメ）
-  - クイズ画面: 5科目 × 5問（3択・シャッフル対応）
-  - エンディング画面: GOOD END / NORMAL END
+  - クイズ画面: 5科目 × 5問（3択・シャッフル対応）／ 2ゲームモード対応
+  - エンディング画面: GOOD END / NORMAL END（パーティクル加飾）
   - 開発チーム画面: 本画面
+
+■ 2ゲームモード
+  Mode1: 乙女ゲームモード（assets/images/　← 先生リアル絵）
+  Mode2: SDゲームモード  （assets/images_sd/ ← SDキャラ絵）
+  ※ ローディング完了後に選択、タイトル画面からも再選択可能
 
 ■ 5科目 クイズ
   Network / PLC / Database / Java / Android
@@ -64,7 +76,7 @@
   最高親密度 ≥ 3 → GOOD END
 
 ■ BGM・SE
-  BGM: BGM担当者の楽曲 + SUNO V5
+  BGM: SUNO V5
   SE: 効果音ラボ様　提供素材
 
 ■ 解像度対応
@@ -105,9 +117,11 @@
     allCleared    : 全クリアフラグ（真偽値）
 
 ■ メッセージシステム（外部JSON化）
-  assets/data/messages_quiz.json   ← クイズメッセージ（4種×5先生）
-  assets/data/messages_story.json  ← イントロ会話（5科目×5パターン）
-  assets/data/messages_ending.json ← エンディングメッセージ（5先生×5パターン）
+  assets/data/messages_quiz.json       ← クイズメッセージ（4種×5先生）
+  assets/data/messages_quiz_clear.json ← ステージクリア時メッセージ
+  assets/data/messages_story.json      ← イントロ会話（5科目×5パターン）
+  assets/data/messages_ending.json     ← エンディングメッセージ（5先生×5パターン）
+  assets/data/teacher_names.json       ← 先生名シャッフル候補（50件）
   ※ 初回アクセス時のみfetch、以降はインスタンスキャッシュで管理
 
 ■ クイズシステム
@@ -127,6 +141,11 @@
   基準解像度: 1920 × 1080（固定）
   方式: CSS transform: scale() によるレターボックス表示
   対応: ウィンドウリサイズ・画面回転イベントで随時再計算
+
+■ iOS PWA対応
+  apple-mobile-web-app-capable : ホーム画面追加でフルスクリーン起動
+  apple-touch-icon (180×180px) : ホーム画面アイコン設定済み
+  非PCブラウザ起動時に requestFullscreen() を自動実行
 
 ■ 音声設計
   BGM : HTMLAudioElement によるループ再生
