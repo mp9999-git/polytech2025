@@ -1571,3 +1571,51 @@ html, body {
   to   { opacity: 0; transform: translateX(-50%) translateY(-20px); }
 }
 
+/* キャラ人数に応じた画像サイズ調整 */
+#ending-chars-container[data-count="1"] .ending-char-img,
+#ending-chars-container[data-count="2"] .ending-char-img,
+#ending-chars-container[data-count="3"] .ending-char-img {
+  max-height: 430px;
+}
+#ending-chars-container[data-count="4"] .ending-char-img,
+#ending-chars-container[data-count="5"] .ending-char-img {
+  max-height: 370px;
+}
+#ending-chars-container[data-count="4"] .ending-char-name,
+#ending-chars-container[data-count="5"] .ending-char-name {
+  font-size: 26px;
+}
+
+/* 浮遊星パーティクル（GOOD END・filter なし軽量版） */
+.end-star {
+  position: absolute;
+  pointer-events: none;
+  z-index: 16;
+  font-style: normal;
+  animation: star-float linear infinite;
+  opacity: 0;
+  user-select: none;
+}
+@keyframes star-float {
+  0%   { transform: translateY(0px) rotate(0deg) scale(0.6);   opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 0.9; }
+  100% { transform: translateY(-220px) rotate(400deg) scale(1.3); opacity: 0; }
+}
+
+/* 落下光粒パーティクル（NORMAL END・box-shadow なし軽量版） */
+.end-drop {
+  position: absolute;
+  pointer-events: none;
+  z-index: 16;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: drop-fall linear infinite;
+  opacity: 0;
+}
+@keyframes drop-fall {
+  0%   { transform: translateY(0px) scaleX(0.85);   opacity: 0; }
+  8%   { opacity: 0.75; }
+  92%  { opacity: 0.4; }
+  100% { transform: translateY(160px) scaleX(0.85); opacity: 0; }
+}
+
