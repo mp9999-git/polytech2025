@@ -71,14 +71,22 @@ class App {
 
   /** ローディング完了 → タイトルへ */
   goToTitle() {
-    // スマートフォン等で全画面になっていない場合は全画面リクエスト
-    if (!this._isPC() && !document.fullscreenElement && !document.webkitFullscreenElement) {
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    }
+    this.tryFullscreen();
     this._showScreen('title');
     this._screens.title.show();
+  }
+
+  /**
+   * PC 以外のデバイスで全画面リクエストを行う共通メソッド
+   * fullscreen API はユーザー操作ハンドラ内から呼ぶ必要があるため
+   * 各呼び出し元はそのまま残し、実装だけここに集約する
+   */
+  tryFullscreen() {
+    if (this._isPC()) return;
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
   }
 
   /**
