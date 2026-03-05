@@ -207,10 +207,6 @@ class LoadingScreen {
 
     const onModeSelect = (mode) => {
       if (!this._loaded) return;
-      const el = document.documentElement;
-      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      if (screen.orientation?.lock) screen.orientation.lock('landscape').catch(() => {});
       this._app.state.gameMode = mode;
       this._app.saveState();
       this._app.sound.requestWakeLock();
