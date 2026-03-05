@@ -1,4 +1,4 @@
-/**
+﻿/**
  * title.js - タイトル画面
  * ケンバーンズ効果の背景アニメーション、ボタン処理
  */
@@ -66,7 +66,7 @@ class TitleScreen {
     const overlay = document.getElementById('title-mode2-overlay');
     const titleText = document.getElementById('title-text');
     if (this._app.state.gameMode === 2) {
-      overlay.src = 'assets/images2/title.webp';
+      overlay.src = 'assets/images_sd/title.webp';
       overlay.classList.remove('hidden');
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 1.5s ease';

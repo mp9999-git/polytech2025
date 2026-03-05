@@ -1,4 +1,4 @@
-/**
+﻿/**
  * app.js - Polytech Memorial Web版 メインコントローラー
  * 画面遷移・状態管理・スケーリングを統括する
  *
@@ -182,10 +182,10 @@ class App {
   /**
    * モードに応じた画像ファイルのパスを返す
    * Mode 1（乙女ゲームモード）→ assets/images/
-   * Mode 2（SDゲームモード）  → assets/images2/
+   * Mode 2（SDゲームモード）  → assets/images_sd/
    */
   getImgPath(filename) {
-    const folder = this.state.gameMode === 2 ? 'assets/images2' : 'assets/images';
+    const folder = this.state.gameMode === 2 ? 'assets/images_sd' : 'assets/images';
     return `${folder}/${filename}`;
   }
 

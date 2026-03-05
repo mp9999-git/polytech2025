@@ -1,4 +1,4 @@
-/**
+﻿/**
  * loading.js - ローディング画面
  * 全アセット（画像・音声・データ）をプリロードし、完了後にモード選択画面を表示する
  *
@@ -38,38 +38,38 @@ const IMAGE_ASSETS = [
 ];
 
 const MODE2_IMAGE_ASSETS = [
-  'assets/images2/poly.webp',
-  'assets/images2/polytech_outside.webp',
-  'assets/images2/haikei.webp',
-  'assets/images2/polytech_run.webp',
-  'assets/images2/ending_good.webp',
-  'assets/images2/ending_normal.webp',
-  'assets/images2/title.webp',
-  'assets/images2/teacher1.webp',
-  'assets/images2/teacher1_happy.webp',
-  'assets/images2/teacher1_cry.webp',
-  'assets/images2/teacher1_cry2.webp',
-  'assets/images2/teacher1_ending.webp',
-  'assets/images2/teacher2.webp',
-  'assets/images2/teacher2_happy.webp',
-  'assets/images2/teacher2_cry.webp',
-  'assets/images2/teacher2_cry2.webp',
-  'assets/images2/teacher2_ending.webp',
-  'assets/images2/teacher3.webp',
-  'assets/images2/teacher3_happy.webp',
-  'assets/images2/teacher3_cry.webp',
-  'assets/images2/teacher3_cry2.webp',
-  'assets/images2/teacher3_ending.webp',
-  'assets/images2/teacher4.webp',
-  'assets/images2/teacher4_happy.webp',
-  'assets/images2/teacher4_cry.webp',
-  'assets/images2/teacher4_cry2.webp',
-  'assets/images2/teacher4_ending.webp',
-  'assets/images2/teacher5.webp',
-  'assets/images2/teacher5_happy.webp',
-  'assets/images2/teacher5_cry.webp',
-  'assets/images2/teacher5_cry2.webp',
-  'assets/images2/teacher5_ending.webp'
+  'assets/images_sd/poly.webp',
+  'assets/images_sd/polytech_outside.webp',
+  'assets/images_sd/haikei.webp',
+  'assets/images_sd/polytech_run.webp',
+  'assets/images_sd/ending_good.webp',
+  'assets/images_sd/ending_normal.webp',
+  'assets/images_sd/title.webp',
+  'assets/images_sd/teacher1.webp',
+  'assets/images_sd/teacher1_happy.webp',
+  'assets/images_sd/teacher1_cry.webp',
+  'assets/images_sd/teacher1_cry2.webp',
+  'assets/images_sd/teacher1_ending.webp',
+  'assets/images_sd/teacher2.webp',
+  'assets/images_sd/teacher2_happy.webp',
+  'assets/images_sd/teacher2_cry.webp',
+  'assets/images_sd/teacher2_cry2.webp',
+  'assets/images_sd/teacher2_ending.webp',
+  'assets/images_sd/teacher3.webp',
+  'assets/images_sd/teacher3_happy.webp',
+  'assets/images_sd/teacher3_cry.webp',
+  'assets/images_sd/teacher3_cry2.webp',
+  'assets/images_sd/teacher3_ending.webp',
+  'assets/images_sd/teacher4.webp',
+  'assets/images_sd/teacher4_happy.webp',
+  'assets/images_sd/teacher4_cry.webp',
+  'assets/images_sd/teacher4_cry2.webp',
+  'assets/images_sd/teacher4_ending.webp',
+  'assets/images_sd/teacher5.webp',
+  'assets/images_sd/teacher5_happy.webp',
+  'assets/images_sd/teacher5_cry.webp',
+  'assets/images_sd/teacher5_cry2.webp',
+  'assets/images_sd/teacher5_ending.webp'
 ];
 
 const AUDIO_ASSETS = [

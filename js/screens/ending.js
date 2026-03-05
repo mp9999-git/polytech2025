@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ending.js - エンディング画面
  * 全ステージクリア後、親密度に基づいてGOOD END / NORMAL ENDを判定
  * メッセージは data/messages_ending.json から読み込む
@@ -95,6 +95,7 @@ class EndingScreen {
   hide() {
     this._confetti.stop();
     this._stopTyping();
+    this._el.querySelectorAll('.end-star, .end-drop').forEach(e => e.remove());
     this._el.classList.remove('active');
     this._el.classList.add('hidden');
   }
@@ -104,7 +105,8 @@ class EndingScreen {
     this._app.sound.playBGM('ending_happy');
 
     this._typeText.textContent = '✨ GOOD END ✨';
-    this._typeText.style.color = '#FF0000';
+    this._typeText.className = 'end-good';
+    this._createParticles('good');
 
     // キャラクター表示（全員笑顔）
     this._renderChars(topCharIds, teacherNames, this._app.state.intimacy, true);
@@ -132,7 +134,8 @@ class EndingScreen {
     this._app.sound.playBGM('ending_normal');
 
     this._typeText.textContent = 'NORMAL END';
-    this._typeText.style.color = '#FF0000';
+    this._typeText.className = 'end-normal';
+    this._createParticles('normal');
 
     // 親密度が0の先生は表示しない
     const intimacy = this._app.state.intimacy;
@@ -150,8 +153,49 @@ class EndingScreen {
     this._startTyping(msg, this._msgText);
   }
 
+  /** エンドタイプ別パーティクル生成 */
+  _createParticles(endType) {
+    this._el.querySelectorAll('.end-star, .end-drop').forEach(e => e.remove());
+    const STAR_CHARS  = ['★', '✦', '✧', '◆', '✱', '✸'];
+    const STAR_COLORS = ['#FFD700', '#FFA500', '#FF8C00', '#FFE566', '#FFCC00', '#FFC040'];
+
+    if (endType === 'good') {
+      for (let i = 0; i < 20; i++) {
+        const el = document.createElement('span');
+        el.className   = 'end-star';
+        el.textContent = STAR_CHARS[i % STAR_CHARS.length];
+        el.style.fontSize = (40 + Math.random() * 50) + 'px';
+        el.style.color    = STAR_COLORS[i % STAR_COLORS.length];
+        el.style.filter   = `drop-shadow(0 0 8px ${STAR_COLORS[i % STAR_COLORS.length]})`;
+        el.style.left = (300 + Math.random() * 1320) + 'px';
+        el.style.top  = (5   + Math.random() * 150)  + 'px';
+        el.style.animationDuration = (2.0 + Math.random() * 2.5) + 's';
+        el.style.animationDelay   = (Math.random() * 3.5) + 's';
+        this._el.appendChild(el);
+      }
+    } else {
+      for (let i = 0; i < 24; i++) {
+        const el = document.createElement('div');
+        el.className = 'end-drop';
+        const size = 7 + Math.random() * 13;
+        el.style.width  = size + 'px';
+        el.style.height = (size * 1.6) + 'px';
+        const r = 110 + Math.floor(Math.random() * 60);
+        const g = 165 + Math.floor(Math.random() * 65);
+        el.style.background = `rgba(${r}, ${g}, 255, 0.95)`;
+        el.style.boxShadow  = `0 0 10px rgba(${r}, ${g}, 255, 0.9), 0 0 20px rgba(${r}, ${g}, 255, 0.5)`;
+        el.style.left = (300 + Math.random() * 1320) + 'px';
+        el.style.top  = (10  + Math.random() * 120)  + 'px';
+        el.style.animationDuration = (1.5 + Math.random() * 2.0) + 's';
+        el.style.animationDelay   = (Math.random() * 3.0) + 's';
+        this._el.appendChild(el);
+      }
+    }
+  }
+
   _renderChars(charIds, teacherNames, intimacy, isHappy) {
     this._charsContainer.innerHTML = '';
+    this._charsContainer.dataset.count = charIds.length;
     let suffix;
     if (isHappy) {
       suffix = this._app.state.gameMode === 2 ? '_ending' : '_happy';
@@ -169,7 +213,8 @@ class EndingScreen {
       img.alt       = name;
       // Mode2のSDキャラは小さいため高さを固定して拡大表示
       if (this._app.state.gameMode === 2) {
-        img.style.height = '480px';
+        const sdHeights = [480, 480, 460, 400, 360];
+        img.style.height = (sdHeights[charIds.length - 1] || 360) + 'px';
         img.style.width  = 'auto';
       }
 
