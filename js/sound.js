@@ -106,6 +106,7 @@ class SoundManager {
       case 'miss':    el = this._seMiss;    break;
     }
     if (!el) return;
+    el.pause();
     el.volume = this._seVolume;
     el.currentTime = 0;
     const p = el.play();
