@@ -40,6 +40,7 @@ class SoundManager {
     this._bgmVolume   = 0.75;  // BGM の音量（0.0 〜 1.0）
     this._seVolume    = 0.8;   // SE の音量（0.0 〜 1.0）
     this._muted       = false;  // ユーザーが明示的にミュートしているか
+    this._activeSE    = {};     // 再生中の SE インスタンス（型ごとに追跡）
 
     if (this._bgmPlayer) {
       this._bgmPlayer.volume = this._bgmVolume;
@@ -96,9 +97,9 @@ class SoundManager {
   }
 
   /** SE 再生
-   * iOS Safari では同一 <audio> 要素の pause()/play() が連打時にブロックされるため、
-   * 毎回 new Audio() を生成して再生する（click ハンドラ内なので iOS でも許可される）。
-   * 元の <audio> 要素は src 参照用として保持。
+   * iOS Safari では複数の Audio インスタンスが再生キューに積まれるため、
+   * 同じ種類の SE が再生中なら先に止めてから新しいインスタンスで即時再生する。
+   * 元の <audio> 要素は src 取得用として保持。
    */
   playSE(type) {
     if (this._muted) return;
@@ -110,8 +111,12 @@ class SoundManager {
       case 'miss':    src = this._seMiss?.src;    break;
     }
     if (!src) return;
+    // 同じ種類が再生中なら停止（キュー積みを防ぐ）
+    const prev = this._activeSE[type];
+    if (prev) { prev.pause(); }
     const audio = new Audio(src);
     audio.volume = this._seVolume;
+    this._activeSE[type] = audio;
     const p = audio.play();
     if (p) p.catch(() => {});
   }
