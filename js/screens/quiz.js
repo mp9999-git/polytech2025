@@ -456,8 +456,8 @@ class QuizScreen {
       el.textContent = STAR_CHARS[i % STAR_CHARS.length];
       el.style.fontSize = (40 + Math.random() * 50) + 'px';
       el.style.color    = STAR_COLORS[i % STAR_COLORS.length];
-      el.style.left = (300 + Math.random() * 1320) + 'px';
-      el.style.top  = (5   + Math.random() * 150)  + 'px';
+      el.style.left = (15 + Math.random() * 70) + '%';
+      el.style.top  = (0.5 + Math.random() * 14) + '%';
       el.style.animationDuration = (2.0 + Math.random() * 2.5) + 's';
       el.style.animationDelay   = (Math.random() * 3.5) + 's';
       // quiz-clear-text の前に挿入してテキストの背後に表示
