@@ -49,7 +49,7 @@ class TitleScreen {
   }
 
   _enterFullscreen() {
-    app.tryFullscreen();
+    this._app.tryFullscreen();
   }
 
   show() {
