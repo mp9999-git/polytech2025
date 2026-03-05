@@ -160,8 +160,8 @@ html, body {
   background: rgba(0,0,0,0.6);
   border-radius: 24px;
   backdrop-filter: blur(4px);
-  /* 中央より上方に配置（読み込み完了テキストとの重なりを回避） */
-  margin-bottom: 200px;
+  /* 中央より少し上に配置（読み込み完了テキストとの重なりを回避） */
+  margin-bottom: 80px;
 }
 
 #loading-tap-overlay.hidden { display: none; }
@@ -185,8 +185,8 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  width: 380px;
-  padding: 48px 36px;
+  width: 460px;
+  padding: 48px 48px;
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -221,6 +221,7 @@ html, body {
   text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   line-height: 1.2;
   text-align: center;
+  white-space: nowrap;
 }
 
 .mode-btn-desc {
@@ -238,7 +239,7 @@ html, body {
 
 #ios-hint {
   position: absolute;
-  bottom: 220px;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.75);

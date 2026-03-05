@@ -255,6 +255,11 @@ class App {
    * 基準解像度 1920x1080 を維持したまま、アスペクト比を保って拡縮する（レターボックス方式）
    */
   _applyScale() {
+    // ソフトキーボード表示中（input/textarea フォーカス中）はスキップ
+    // → resize イベントで transform が変わるとキーボードが即閉じる問題を防ぐ
+    const active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+
     const vw     = window.innerWidth;
     const vh     = window.innerHeight;
     // 横方向・縦方向それぞれの倍率を計算
