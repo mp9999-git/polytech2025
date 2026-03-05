@@ -95,21 +95,24 @@ class SoundManager {
     this.playBGM(key);
   }
 
-  /** SE 再生 */
+  /** SE 再生
+   * iOS Safari では同一 <audio> 要素の pause()/play() が連打時にブロックされるため、
+   * 毎回 new Audio() を生成して再生する（click ハンドラ内なので iOS でも許可される）。
+   * 元の <audio> 要素は src 参照用として保持。
+   */
   playSE(type) {
     if (this._muted) return;
-    let el = null;
+    let src = null;
     switch (type) {
-      case 'start':   el = this._seStart;   break;
-      case 'button':  el = this._seButton;  break;
-      case 'success': el = this._seSuccess; break;
-      case 'miss':    el = this._seMiss;    break;
+      case 'start':   src = this._seStart?.src;   break;
+      case 'button':  src = this._seButton?.src;  break;
+      case 'success': src = this._seSuccess?.src; break;
+      case 'miss':    src = this._seMiss?.src;    break;
     }
-    if (!el) return;
-    el.pause();
-    el.volume = this._seVolume;
-    el.currentTime = 0;
-    const p = el.play();
+    if (!src) return;
+    const audio = new Audio(src);
+    audio.volume = this._seVolume;
+    const p = audio.play();
     if (p) p.catch(() => {});
   }
 
