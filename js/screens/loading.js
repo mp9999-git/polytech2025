@@ -186,6 +186,13 @@ class LoadingScreen {
     this._showModeSelect();
   }
 
+  /** タイトル画面の「モード選択」ボタンから呼び出し可能な公開メソッド */
+  showModeSelect() {
+    this._el.classList.remove('hidden');
+    this._el.classList.add('active');
+    this._showModeSelect();
+  }
+
   /** モード選択オーバーレイ表示 */
   _showModeSelect() {
     this._overlay.classList.remove('hidden');

@@ -316,7 +316,7 @@ html, body {
 
 #title-buttons-wrap {
   position: absolute;
-  bottom: 120px;
+  bottom: 40px;
   left: 0;
   right: 0;
   display: flex;
@@ -354,6 +354,32 @@ html, body {
   transform: scale(1.05);
 }
 .title-btn:active { transform: scale(0.97); }
+
+/* モード選択ボタン（タイトル画面 右上） */
+#btn-mode-select {
+  position: absolute;
+  top: 40px;
+  right: 60px;
+  z-index: 20;
+  padding: 18px 44px;
+  font-size: 32px;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(10, 30, 80, 0.75);
+  border: 2px solid rgba(170, 210, 255, 0.6);
+  border-radius: 50px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 0, 80, 0.5);
+  white-space: nowrap;
+}
+#btn-mode-select:hover {
+  background: rgba(40, 80, 180, 0.9);
+  box-shadow: 0 4px 30px rgba(100, 160, 255, 0.5);
+  transform: scale(1.05);
+}
+#btn-mode-select:active { transform: scale(0.97); }
 
 /* ========================================================
    名前入力画面

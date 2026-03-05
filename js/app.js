@@ -168,6 +168,12 @@ class App {
     this._screens.musicTest.show();
   }
 
+  /** タイトル → モード選択オーバーレイへ戻る */
+  goToModeSelect() {
+    this._showScreen('loading');
+    this._screens.loading.showModeSelect();
+  }
+
   /** ゲーム状態を LocalStorage に保存 */
   saveState() {
     saveState(this.state);

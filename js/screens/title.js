@@ -41,6 +41,11 @@ class TitleScreen {
       app.sound.playSE('button');
       app.goToMusicTest();
     });
+
+    document.getElementById('btn-mode-select').addEventListener('click', () => {
+      app.sound.playSE('button');
+      app.goToModeSelect();
+    });
   }
 
   _enterFullscreen() {
