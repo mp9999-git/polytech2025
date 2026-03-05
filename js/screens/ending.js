@@ -104,7 +104,7 @@ class EndingScreen {
     this._app.sound.playBGM('ending_happy');
 
     this._typeText.textContent = '✨ GOOD END ✨';
-    this._typeText.style.color = '#FF0000';
+    this._typeText.className = 'end-good';
 
     // キャラクター表示（全員笑顔）
     this._renderChars(topCharIds, teacherNames, this._app.state.intimacy, true);
@@ -132,7 +132,7 @@ class EndingScreen {
     this._app.sound.playBGM('ending_normal');
 
     this._typeText.textContent = 'NORMAL END';
-    this._typeText.style.color = '#FF0000';
+    this._typeText.className = 'end-normal';
 
     // 親密度が0の先生は表示しない
     const intimacy = this._app.state.intimacy;

@@ -1570,3 +1570,59 @@ html, body {
   from { opacity: 1; transform: translateX(-50%) translateY(0); }
   to   { opacity: 0; transform: translateX(-50%) translateY(-20px); }
 }
+
+/* ---- エンディングタイプテキスト 加飾 ---- */
+
+/* GOOD END: 金色グロー（縁取り＋パルスグロー） */
+#ending-type-text.end-good {
+  color: #FFE566;
+  background: none;
+  border: none;
+  animation: end-good-glow 2s ease-in-out infinite;
+  text-shadow:
+    -3px -3px 0 rgba(0,0,0,0.95),
+     3px -3px 0 rgba(0,0,0,0.95),
+    -3px  3px 0 rgba(0,0,0,0.95),
+     3px  3px 0 rgba(0,0,0,0.95),
+    0 0 30px #FFD700,
+    0 0 75px rgba(255, 160, 0, 1.0),
+    0 0 150px rgba(255, 100, 0, 0.6);
+}
+@keyframes end-good-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 38px rgba(255, 200, 0, 0.75))
+            drop-shadow(0 0 90px rgba(255, 140, 0, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 83px rgba(255, 220, 0, 1.0))
+            drop-shadow(0 0 165px rgba(255, 180, 0, 0.83))
+            drop-shadow(0 0 270px rgba(255, 100, 0, 0.38));
+  }
+}
+
+/* NORMAL END: 青銀グロー（縁取り＋フェードグロー） */
+#ending-type-text.end-normal {
+  color: #C8DEFF;
+  background: none;
+  border: none;
+  animation: end-normal-glow 3s ease-in-out infinite;
+  text-shadow:
+    -3px -3px 0 rgba(0,0,0,0.95),
+     3px -3px 0 rgba(0,0,0,0.95),
+    -3px  3px 0 rgba(0,0,0,0.95),
+     3px  3px 0 rgba(0,0,0,0.95),
+    0 0 30px rgba(160, 210, 255, 1.0),
+    0 0 75px rgba(100, 160, 255, 0.75);
+}
+@keyframes end-normal-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 30px rgba(100, 150, 255, 0.53))
+            drop-shadow(0 0 75px rgba(80, 120, 220, 0.30));
+  }
+  50% {
+    filter: drop-shadow(0 0 68px rgba(140, 200, 255, 0.98))
+            drop-shadow(0 0 135px rgba(90, 140, 255, 0.53))
+            drop-shadow(0 0 210px rgba(60, 100, 220, 0.27));
+  }
+}
+
