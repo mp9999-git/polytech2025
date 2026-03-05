@@ -20,7 +20,7 @@ const COLORS = [
   '#7CFC00', '#00BFFF', '#9370DB',
   '#FFFFFF', '#FF4500', '#00CED1'
 ];
-const PARTICLE_COUNT = 120;
+const PARTICLE_COUNT = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 40 : 120;
 
 class Confetti {
   constructor(canvas) {
