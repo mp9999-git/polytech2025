@@ -49,6 +49,7 @@ class TitleScreen {
   }
 
   _enterFullscreen() {
+    if (app._isPC()) return;
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();

@@ -145,7 +145,7 @@
 ■ iOS PWA対応
   apple-mobile-web-app-capable : ホーム画面追加でフルスクリーン起動
   apple-touch-icon (180×180px) : ホーム画面アイコン設定済み
-  非PCブラウザ起動時に requestFullscreen() を自動実行
+  ボタン操作時に requestFullscreen() を実行（PC除く・全画面への切替）
 
 ■ 音声設計
   BGM : HTMLAudioElement によるループ再生
