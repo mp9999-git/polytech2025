@@ -184,6 +184,7 @@ class QuizScreen {
       this._confettiTimer = null;
     }
     this._stopTyping();
+    this._clearOverlay.querySelectorAll('.end-star').forEach(e => e.remove());
     this._clearOverlay.classList.add('hidden');
   }
 
@@ -403,6 +404,7 @@ class QuizScreen {
 
       // クリアオーバーレイ表示（透明・クリック透過）
       this._clearOverlay.classList.remove('hidden');
+      this._createClearParticles();
       this._app.sound.playBGM('clear');
 
       // 先生の表情を親密度に応じて選択（0:cry2/cry 1:cry 2-3:normal 4-5:happy）
@@ -439,6 +441,27 @@ class QuizScreen {
       // 次へボタン（遷移用テキスト）
       this._nextBtn.textContent = nextStage ? '次のステージへ ▶' : 'エンディングへ ▶';
       this._nextBtn.classList.remove('hidden');
+    }
+  }
+
+  /** ステージクリア時の星パーティクル生成（quiz-clear-text の背後に表示） */
+  _createClearParticles() {
+    this._clearOverlay.querySelectorAll('.end-star').forEach(e => e.remove());
+    const STAR_CHARS  = ['★', '✦', '✧', '◆', '✱', '✸'];
+    const STAR_COLORS = ['#FFD700', '#FFA500', '#FF8C00', '#FFE566', '#FFCC00', '#FFC040'];
+    const clearText   = document.getElementById('quiz-clear-text');
+    for (let i = 0; i < 20; i++) {
+      const el = document.createElement('span');
+      el.className   = 'end-star';
+      el.textContent = STAR_CHARS[i % STAR_CHARS.length];
+      el.style.fontSize = (40 + Math.random() * 50) + 'px';
+      el.style.color    = STAR_COLORS[i % STAR_COLORS.length];
+      el.style.left = (300 + Math.random() * 1320) + 'px';
+      el.style.top  = (5   + Math.random() * 150)  + 'px';
+      el.style.animationDuration = (2.0 + Math.random() * 2.5) + 's';
+      el.style.animationDelay   = (Math.random() * 3.5) + 's';
+      // quiz-clear-text の前に挿入してテキストの背後に表示
+      this._clearOverlay.insertBefore(el, clearText);
     }
   }
 
