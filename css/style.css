@@ -970,10 +970,10 @@ html, body {
 /* キャラクターコンテナ */
 #ending-chars-container {
   position: absolute;
-  top: 20px;
+  top: 144px;
+  bottom: 310px;
   left: 0;
   right: 0;
-  height: 60%;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1004,7 +1004,7 @@ html, body {
 
 #ending-type-text {
   position: absolute;
-  top: 20px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -1029,7 +1029,7 @@ html, body {
   z-index: 20;
 }
 
-#ending-msg-body { overflow-y: auto; max-height: 300px; }
+#ending-msg-body { overflow-y: auto; max-height: 240px; }
 
 #ending-msg-text {
   font-size: 36px;
@@ -1638,15 +1638,11 @@ html, body {
 }
 
 /* キャラ人数に応じた画像サイズ調整 */
-#ending-chars-container[data-count="1"] .ending-char-img,
-#ending-chars-container[data-count="2"] .ending-char-img,
-#ending-chars-container[data-count="3"] .ending-char-img {
-  max-height: 430px;
-}
-#ending-chars-container[data-count="4"] .ending-char-img,
-#ending-chars-container[data-count="5"] .ending-char-img {
-  max-height: 370px;
-}
+#ending-chars-container[data-count="1"] .ending-char-img { max-height: 560px; }
+#ending-chars-container[data-count="2"] .ending-char-img { max-height: 540px; }
+#ending-chars-container[data-count="3"] .ending-char-img { max-height: 490px; }
+#ending-chars-container[data-count="4"] .ending-char-img { max-height: 410px; }
+#ending-chars-container[data-count="5"] .ending-char-img { max-height: 360px; }
 #ending-chars-container[data-count="4"] .ending-char-name,
 #ending-chars-container[data-count="5"] .ending-char-name {
   font-size: 26px;

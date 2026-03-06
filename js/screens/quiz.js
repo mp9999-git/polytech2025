@@ -431,9 +431,7 @@ class QuizScreen {
       const scoreText = `【結果】${this._questions.length}問中${this._correctCount}問正解！`;
       const teacherMsgs = (this._clearMessages || {})[String(this._charId)] || {};
       const scoreMsgs = teacherMsgs[String(this._correctCount)] || [];
-      const clearMsg = scoreMsgs.length > 0
-        ? scoreMsgs[Math.floor(Math.random() * scoreMsgs.length)]
-        : ((this._messages.clear || {})[this._charId]?.[0] || '');
+      const clearMsg = scoreMsgs[Math.floor(Math.random() * scoreMsgs.length)] || '';
       const playerName = this._app.state.playerName || '訓練生';
       const resolvedMsg = clearMsg.replace(/\{\{player\}\}/g, playerName);
       this._startTyping(scoreText + '\n' + resolvedMsg, this._msgText);
