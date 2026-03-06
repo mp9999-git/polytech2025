@@ -971,7 +971,7 @@ html, body {
 #ending-chars-container {
   position: absolute;
   top: 144px;
-  bottom: 310px;
+  bottom: 332px;
   left: 0;
   right: 0;
   display: flex;
@@ -1029,7 +1029,7 @@ html, body {
   z-index: 20;
 }
 
-#ending-msg-body { overflow-y: auto; max-height: 240px; }
+#ending-msg-body { overflow-y: auto; max-height: 262px; }
 
 #ending-msg-text {
   font-size: 36px;
