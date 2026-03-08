@@ -273,8 +273,13 @@ class App {
     }, { passive: true });
 
     document.addEventListener('touchmove', (e) => {
-      // ピンチ（複数タッチ）はジェスチャーとして扱う
-      if (e.touches.length > 1 || startTouches > 1) {
+      // ピンチ（複数タッチ）: ブラウザのズーム動作を抑止
+      if (e.touches.length >= 2) {
+        e.preventDefault();
+        blockEnd = true;
+        return;
+      }
+      if (startTouches > 1) {
         blockEnd = true;
         return;
       }
@@ -282,7 +287,7 @@ class App {
       const dx = Math.abs(e.touches[0].clientX - startX);
       const dy = Math.abs(e.touches[0].clientY - startY);
       if (dx > THRESHOLD || dy > THRESHOLD) blockEnd = true;
-    }, { passive: true });
+    }, { passive: false }); // passive: false でピンチズームの preventDefault を有効化
 
     // キャプチャフェーズで捕捉 → ボタン等のリスナーより先に実行
     document.addEventListener('touchend', (e) => {
@@ -311,6 +316,12 @@ class App {
       // 旧Android等のフォールバック
       window.addEventListener('orientationchange', () => this._applyScale());
     }
+    // ピンチズーム発生時も即座に補正（iOS 13+ / Chrome 61+）
+    // resize だけでは拾えない visualViewport の変化に対応
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => this._applyScale());
+      window.visualViewport.addEventListener('scroll', () => this._applyScale());
+    }
   }
 
   /**
@@ -323,8 +334,10 @@ class App {
     const active = document.activeElement;
     if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
 
-    const vw     = window.innerWidth;
-    const vh     = window.innerHeight;
+    // visualViewport が使える場合はズーム後の実際のサイズを取得
+    // （ピンチズーム時に window.innerWidth/Height はズームを反映しないため）
+    const vw     = window.visualViewport?.width  ?? window.innerWidth;
+    const vh     = window.visualViewport?.height ?? window.innerHeight;
     // 横方向・縦方向それぞれの倍率を計算
     const scaleX = vw / 1920;
     const scaleY = vh / 1080;

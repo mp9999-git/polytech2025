@@ -1,0 +1,24 @@
+{
+  "name": "ポリテクメモリアル",
+  "short_name": "PolyMemo",
+  "description": "ポリテクセンターを舞台にした学習型ビジュアルノベルゲーム",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#1a2a5a",
+  "icons": [
+    {
+      "src": "assets/polytech_icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/polytech_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
