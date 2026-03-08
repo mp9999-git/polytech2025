@@ -1,6 +1,6 @@
 {
   "name": "ポリテクメモリアル",
-  "short_name": "PolyMemo",
+  "short_name": "ポリテクメモリアル",
   "description": "ポリテクセンターを舞台にした学習型ビジュアルノベルゲーム",
   "start_url": "./",
   "display": "standalone",
