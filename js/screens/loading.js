@@ -16,7 +16,7 @@
 const IMAGE_ASSETS = [
   'assets/images/polytech_outside.webp',
   'assets/images/polytech_run.webp',
-  'assets/images/poly.webp',
+  'assets/images/opening.webp',
   'assets/images/haikei.webp',
   'assets/images/ending_good.webp',
   'assets/images/ending_normal.webp',
@@ -38,7 +38,7 @@ const IMAGE_ASSETS = [
 ];
 
 const MODE2_IMAGE_ASSETS = [
-  'assets/images_sd/poly.webp',
+  'assets/images_sd/opening.webp',
   'assets/images_sd/polytech_outside.webp',
   'assets/images_sd/haikei.webp',
   'assets/images_sd/polytech_run.webp',

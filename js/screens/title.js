@@ -57,7 +57,7 @@ class TitleScreen {
     this._el.classList.add('active');
 
     // モードに応じた背景画像を設定（object-fit: cover で解像度差を吸収）
-    this._bg.src = this._app.getImgPath('poly.webp');
+    this._bg.src = this._app.getImgPath('opening.webp');
 
     // Mode 2: title.webp オーバーレイをフェードインで表示、タイトルテキストを非表示
     const overlay = document.getElementById('title-mode2-overlay');
