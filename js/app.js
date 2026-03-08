@@ -319,7 +319,17 @@ class App {
     // ピンチズーム発生時も即座に補正（iOS 13+ / Chrome 61+）
     // resize だけでは拾えない visualViewport の変化に対応
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', () => this._applyScale());
+      // scale が変化した場合のみ補正する（ピンチズーム）
+      // scale 変化なし = ソフトキーボード起因のリサイズ → スキップ
+      // （キーボード起因は window.resize が対応し、INPUT フォーカスガードが機能する）
+      let _lastVvScale = 1;
+      window.visualViewport.addEventListener('resize', () => {
+        const s = window.visualViewport.scale;
+        if (Math.abs(s - _lastVvScale) > 0.01) {
+          _lastVvScale = s;
+          this._applyScale();
+        }
+      });
       window.visualViewport.addEventListener('scroll', () => this._applyScale());
     }
   }
