@@ -42,6 +42,11 @@ class SoundManager {
     this._muted       = false;  // ユーザーが明示的にミュートしているか
     this._activeSE    = {};     // 再生中の SE インスタンス（型ごとに追跡）
 
+    // Web Audio API（SE の低遅延再生用）
+    this._audioCtx      = null;  // AudioContext（ユーザー操作後に生成）
+    this._seGainNode    = null;  // SE 全体の音量制御ノード
+    this._seBuffers     = {};    // デコード済み AudioBuffer のキャッシュ
+
     if (this._bgmPlayer) {
       this._bgmPlayer.volume = this._bgmVolume;
       this._bgmPlayer.loop   = true;
@@ -96,13 +101,26 @@ class SoundManager {
     this.playBGM(key);
   }
 
-  /** SE 再生
-   * iOS Safari では複数の Audio インスタンスが再生キューに積まれるため、
-   * 同じ種類の SE が再生中なら先に止めてから新しいインスタンスで即時再生する。
-   * 元の <audio> 要素は src 取得用として保持。
+  /**
+   * SE 再生
+   * デコード済み AudioBuffer があれば Web Audio API で即時再生（iOS Safari のラグ解消）。
+   * AudioContext 未初期化またはデコード未完了の場合は new Audio() でフォールバック。
    */
   playSE(type) {
     if (this._muted) return;
+
+    // Web Audio API パス（デコード済みバッファがある場合）
+    if (this._audioCtx && this._seBuffers[type]) {
+      // バックグラウンド復帰後などで suspended になっている場合は resume
+      if (this._audioCtx.state === 'suspended') this._audioCtx.resume();
+      const source = this._audioCtx.createBufferSource();
+      source.buffer = this._seBuffers[type];
+      source.connect(this._seGainNode);
+      source.start(0);
+      return;
+    }
+
+    // フォールバック: new Audio()（AudioContext 未初期化 or デコード未完了時）
     let src = null;
     switch (type) {
       case 'start':   src = this._seStart?.src;   break;
@@ -111,7 +129,6 @@ class SoundManager {
       case 'miss':    src = this._seMiss?.src;    break;
     }
     if (!src) return;
-    // 同じ種類が再生中なら停止（キュー積みを防ぐ）
     const prev = this._activeSE[type];
     if (prev) { prev.pause(); }
     const audio = new Audio(src);
@@ -121,10 +138,53 @@ class SoundManager {
     if (p) p.catch(() => {});
   }
 
+  /**
+   * Web Audio API を初期化して SE ファイルを事前デコードする
+   * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと
+   */
+  initAudioContext() {
+    if (this._audioCtx) return; // 二重初期化防止
+    try {
+      this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      this._seGainNode = this._audioCtx.createGain();
+      this._seGainNode.gain.value = this._seVolume;
+      this._seGainNode.connect(this._audioCtx.destination);
+      this._decodeSEBuffers();
+    } catch (e) {
+      // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
+    }
+  }
+
+  /**
+   * SE ファイルを fetch して AudioBuffer にデコードしキャッシュする
+   * ローディング画面で既に HTTP キャッシュに入っているため fetch は高速
+   */
+  async _decodeSEBuffers() {
+    const SE_FILES = {
+      start:   this._seStart?.src,
+      button:  this._seButton?.src,
+      success: this._seSuccess?.src,
+      miss:    this._seMiss?.src
+    };
+    await Promise.all(Object.entries(SE_FILES).map(async ([key, src]) => {
+      if (!src) return;
+      try {
+        const res = await fetch(src);
+        const buf = await res.arrayBuffer();
+        this._seBuffers[key] = await this._audioCtx.decodeAudioData(buf);
+      } catch (e) {
+        // デコード失敗時はフォールバックが使われるため無視
+      }
+    }));
+  }
+
   /** ミュート切り替え */
   toggleMute() {
     this._muted = !this._muted;
     this._bgmPlayer.muted = this._muted;
+    if (this._seGainNode) {
+      this._seGainNode.gain.value = this._muted ? 0 : this._seVolume;
+    }
   }
 
   /** WakeLock リクエスト（スリープ防止） */

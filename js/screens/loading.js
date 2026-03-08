@@ -209,6 +209,7 @@ class LoadingScreen {
       if (!this._loaded) return;
       this._app.state.gameMode = mode;
       this._app.saveState();
+      this._app.sound.initAudioContext(); // iOS Safari の SE ラグ解消：ユーザー操作中に AudioContext を初期化
       this._app.sound.requestWakeLock();
       this._app.goToTitle();
     };
