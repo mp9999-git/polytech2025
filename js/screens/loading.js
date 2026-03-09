@@ -16,6 +16,7 @@
 const IMAGE_ASSETS = [
   'assets/images/polytech_outside.webp',
   'assets/images/polytech_run.webp',
+  'assets/images/opening_old.webp',
   'assets/images/opening1.webp',
   'assets/images/opening2.webp',
   'assets/images/title1.webp',
