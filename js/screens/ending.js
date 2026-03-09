@@ -212,7 +212,7 @@ class EndingScreen {
       // Mode2のSDキャラは小さいため高さを固定して拡大表示
       if (this._app.state.gameMode === 2) {
         const sdHeights = [580, 560, 510, 430, 375];
-        img.style.height = (sdHeights[charIds.length - 1] || 360) + 'px';
+        img.style.height = (sdHeights[Math.min(charIds.length - 1, 4)] || 360) + 'px';
         img.style.width  = 'auto';
       }
 

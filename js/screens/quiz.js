@@ -109,7 +109,7 @@ class QuizScreen {
   }
 
   async show(category) {
-    this._category = category;
+    this._category = category || 'Network';
     this._charId   = CATEGORY_CHAR[category] || 1;
     this._qIndex   = 0;
     this._answered     = false;
@@ -407,7 +407,7 @@ class QuizScreen {
       this._createClearParticles();
       this._app.sound.playBGM('clear');
 
-      // 先生の表情を親密度に応じて選択（0:cry2/cry 1:cry 2-3:normal 4-5:happy）
+      // 先生の表情を親密度に応じて選択（0:cry2/cry 1:cry 2-3:normal 4以上:happy）
       const clearIntimacy = this._localIntimacy[this._charId] || 0;
       let clearFile;
       if (clearIntimacy >= 4) {

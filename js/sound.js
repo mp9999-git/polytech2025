@@ -4,7 +4,8 @@
  *
  * 【主な機能】
  *  - BGM: HTML の <audio> 要素を使ってループ再生
- *  - SE: Audio() を都度生成して多重再生に対応
+ *  - SE: Web Audio API（AudioBufferSourceNode）で低遅延再生
+ *       AudioContext 未対応時は new Audio() でフォールバック
  *  - WakeLock API: 画面スリープを防止（スマートフォン向け）
  *  - Page Visibility API: タブを非表示にした時に BGM を自動一時停止・復帰
  *

@@ -104,6 +104,7 @@ class StoryScreen {
 
   /** 指定インデックスのセリフを表示 */
   _showLine(idx) {
+    if (!this._script[idx]) return;
     const [speaker, text] = this._script[idx];
     const teacherNames = this._app.state.teacherNames;
     const playerName   = this._app.state.playerName || '訓練生';
