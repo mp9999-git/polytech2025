@@ -17,6 +17,7 @@ const IMAGE_ASSETS = [
   'assets/images/polytech_outside.webp',
   'assets/images/polytech_run.webp',
   'assets/images/opening.webp',
+  'assets/images/title.webp',
   'assets/images/haikei.webp',
   'assets/images/ending_good.webp',
   'assets/images/ending_normal.webp',
