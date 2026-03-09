@@ -363,6 +363,10 @@ html, body {
   pointer-events: none;
 }
 #title-mode2-overlay.hidden { display: none; }
+#title-mode2-overlay.mode1 {
+  top: 5%;
+  width: 70%;
+}
 
 #title-text {
   position: absolute;
@@ -1399,7 +1403,10 @@ html, body {
 #qe-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, #0a1040 0%, #000010 70%);
+  background-image: url('../assets/images/opening_old.webp');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
 }
 
 #qe-content {
@@ -1513,7 +1520,10 @@ html, body {
 #mt-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, #0a1040 0%, #000010 70%);
+  background-image: url('../assets/images/opening_old.webp');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
 }
 
 #mt-content {

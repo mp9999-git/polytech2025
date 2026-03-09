@@ -56,21 +56,37 @@ class TitleScreen {
     this._el.classList.remove('hidden');
     this._el.classList.add('active');
 
-    // モードに応じた背景画像を設定（object-fit: cover で解像度差を吸収）
-    this._bg.src = this._app.getImgPath('opening.webp');
-
-    // Mode 2: title.webp オーバーレイをフェードインで表示、タイトルテキストを非表示
+    // Mode別タイトルオーバーレイ表示
     const overlay = document.getElementById('title-mode2-overlay');
     const titleText = document.getElementById('title-text');
-    if (this._app.state.gameMode === 2) {
+    const mode = this._app.state.gameMode;
+
+    // 背景画像: Mode1はopening1/opening2からランダム、他はopening.webp
+    const bgName = (mode === 1)
+      ? `opening${Math.floor(Math.random() * 2) + 1}.webp`
+      : 'opening.webp';
+    this._bg.src = this._app.getImgPath(bgName);
+
+    if (mode === 2) {
       overlay.src = 'assets/images_sd/title.webp';
+      overlay.classList.remove('hidden', 'mode1');
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 1.5s ease';
+      requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+      titleText.style.visibility = 'hidden';
+    } else if (mode === 1) {
+      // title1〜title5からランダム選択
+      const titleNum = Math.floor(Math.random() * 5) + 1;
+      overlay.src = `assets/images/title${titleNum}.webp`;
       overlay.classList.remove('hidden');
+      overlay.classList.add('mode1');
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 1.5s ease';
       requestAnimationFrame(() => { overlay.style.opacity = '1'; });
       titleText.style.visibility = 'hidden';
     } else {
       overlay.classList.add('hidden');
+      overlay.classList.remove('mode1');
       overlay.src = '';
       titleText.style.visibility = 'visible';
     }
@@ -86,6 +102,7 @@ class TitleScreen {
     this._stopKenburns();
     const overlay = document.getElementById('title-mode2-overlay');
     overlay.classList.add('hidden');
+    overlay.classList.remove('mode1');
     overlay.style.opacity = '0';
     document.getElementById('title-text').style.visibility = 'visible';
   }
