@@ -58,6 +58,7 @@ class TitleScreen {
 
     // Mode別タイトルオーバーレイ表示
     const overlay = document.getElementById('title-mode2-overlay');
+    overlay.onload = null; // 前回の遅延 onload をキャンセル
     const titleText = document.getElementById('title-text');
     const mode = this._app.state.gameMode;
 
@@ -67,6 +68,8 @@ class TitleScreen {
       : 'opening.webp';
     this._bg.src = this._app.getImgPath(bgName);
 
+    const logoPanel = document.getElementById('title-logo-panel');
+
     if (mode === 2) {
       overlay.src = 'assets/images_sd/title.webp';
       overlay.classList.remove('hidden', 'mode1');
@@ -74,6 +77,7 @@ class TitleScreen {
       overlay.style.transition = 'opacity 1.5s ease';
       requestAnimationFrame(() => { overlay.style.opacity = '1'; });
       titleText.style.visibility = 'hidden';
+      logoPanel.classList.add('hidden');
     } else if (mode === 1) {
       // title1〜title5からランダム選択
       const titleNum = Math.floor(Math.random() * 5) + 1;
@@ -82,13 +86,33 @@ class TitleScreen {
       overlay.classList.add('mode1');
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 1.5s ease';
-      requestAnimationFrame(() => { overlay.style.opacity = '1'; });
       titleText.style.visibility = 'hidden';
+
+      // 画像ロード後にパネルサイズを画像に合わせて設定
+      const PAD = 32; // 上下パディング(px)
+      const syncPanel = () => {
+        const imgTop  = overlay.offsetTop;
+        const imgH    = overlay.offsetHeight;
+        logoPanel.style.top    = `${imgTop - PAD}px`;
+        logoPanel.style.height = `${imgH + PAD * 2}px`;
+        logoPanel.classList.remove('hidden');
+        logoPanel.style.opacity = '0';
+        requestAnimationFrame(() => {
+          overlay.style.opacity  = '1';
+          logoPanel.style.opacity = '1';
+        });
+      };
+      if (overlay.complete && overlay.naturalHeight > 0) {
+        syncPanel();
+      } else {
+        overlay.onload = syncPanel;
+      }
     } else {
       overlay.classList.add('hidden');
       overlay.classList.remove('mode1');
       overlay.src = '';
       titleText.style.visibility = 'visible';
+      logoPanel.classList.add('hidden');
     }
 
     this._startKenburns();
@@ -101,10 +125,12 @@ class TitleScreen {
     this._el.classList.add('hidden');
     this._stopKenburns();
     const overlay = document.getElementById('title-mode2-overlay');
+    overlay.onload = null; // 遅延 onload をキャンセル
     overlay.classList.add('hidden');
     overlay.classList.remove('mode1');
     overlay.style.opacity = '0';
     document.getElementById('title-text').style.visibility = 'visible';
+    document.getElementById('title-logo-panel').classList.add('hidden');
   }
 
   /** ケンバーンズエフェクト（ズーム+パン+フェードイン） */

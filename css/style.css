@@ -351,6 +351,24 @@ html, body {
   background: transparent;
 }
 
+#title-logo-panel {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72%;
+  background: rgba(255, 255, 255, 0.20);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 28px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  box-shadow:
+    0 8px 48px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+#title-logo-panel.hidden { display: none; }
+
 #title-mode2-overlay {
   position: absolute;
   top: 10px;
