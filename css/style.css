@@ -21,6 +21,11 @@ html, body {
   touch-action: manipulation;
 }
 
+/* touch-action は非継承プロパティのため全要素に明示適用してダブルタップズームを抑止 */
+* {
+  touch-action: manipulation;
+}
+
 /* ---------- ゲームラッパー ---------- */
 #game-wrapper {
   position: fixed;

@@ -272,6 +272,11 @@ class App {
       startTouches = e.touches.length;
     }, { passive: true });
 
+    // iOS Safari: gesturestart/gesturechange でピンチ開始を即座にブロック
+    // （touchmove より先に発火するため、指を広げた瞬間のズームを防げる）
+    document.addEventListener('gesturestart',  (e) => e.preventDefault(), { passive: false });
+    document.addEventListener('gesturechange', (e) => e.preventDefault(), { passive: false });
+
     document.addEventListener('touchmove', (e) => {
       // ピンチ（複数タッチ）: ブラウザのズーム動作を抑止
       if (e.touches.length >= 2) {
