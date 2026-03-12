@@ -179,11 +179,27 @@ class SoundManager {
 
     // --- BGM: iOS Safari のオーディオロックを解除する ---
     // iOS では JS 生成の <audio> も初回再生にユーザー操作が必要。
-    // ユーザー操作のコールバック内で play() → pause() を呼ぶことでロックが解除され、
-    // 以降の playBGM() 呼び出しで即時再生が可能になる。
-    for (const player of Object.values(this._bgmPlayers)) {
+    // ユーザー操作のコールバック内で play() を呼ぶことでロックが解除される。
+    //
+    // 【注意】競合状態の回避について
+    // initAudioContext() の直後に goToTitle() → playBGM(key) が同期的に呼ばれる。
+    // このため .then() が発火するのは playBGM() が _currentBGMKey をセットした後になる。
+    // .then() 内で _currentBGMKey と key を比較し、再生中の曲は pause しないことで
+    // 「unlock の pause が BGM を止めてしまう」競合を防ぐ。
+    // また、unlock 中の音声ブリップを防ぐため volume=0 でサイレント再生する。
+    for (const [key, player] of Object.entries(this._bgmPlayers)) {
+      player.volume = 0;
       const p = player.play();
-      if (p) p.then(() => { player.pause(); player.currentTime = 0; }).catch(() => {});
+      if (p) p.then(() => {
+        player.volume = this._bgmVolume;
+        // 再生中の BGM だけは pause しない（競合防止）
+        if (this._currentBGMKey !== key) {
+          player.pause();
+          player.currentTime = 0;
+        }
+      }).catch(() => {
+        player.volume = this._bgmVolume;
+      });
     }
   }
 
