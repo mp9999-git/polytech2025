@@ -5,6 +5,7 @@
  * 【主な機能】
  *  - BGM: BGM ファイルごとに専用の <audio> 要素を事前生成し src を固定する。
  *         切り替え時は src を変えず play()/pause() のみ呼ぶ → 再バッファリングなし・即時再生。
+ *         停止時は短いフェードアウト（80ms）を挟んでデジタルクリックを防止する。
  *  - SE: Web Audio API（AudioBufferSourceNode）で低遅延再生
  *       AudioContext 未対応時は new Audio() でフォールバック
  *  - WakeLock API: 画面スリープを防止（スマートフォン向け）
@@ -13,6 +14,13 @@
  * 【_bgmPaused と _muted の違い】
  *  - _bgmPaused: タブ非表示など「システム都合」で一時停止した状態（再表示時に自動再開）
  *  - _muted: ユーザーが明示的にミュートした状態（自動解除しない）
+ *
+ * 【iOS Safari のオーディオ制限について】
+ *  iOS はユーザー操作（タップ等）なしに音声を再生できない。
+ *  initAudioContext() をモード選択ボタンのハンドラ内で呼ぶことで AudioContext を解除する。
+ *  BGM の play() は goToTitle() → playBGM() という同期的な呼び出し連鎖を通じて
+ *  ユーザージェスチャーコンテキスト内で実行されるため、個別のバルクアンロックは不要。
+ *  （バルクアンロック＝10曲同時起動は iOS オーディオエンジンに過負荷をかけてノイズの原因になる）
  */
 
 const BGM_FILES = {
@@ -70,11 +78,9 @@ class SoundManager {
     if (!this._bgmPlayers[key]) return;
     if (this._currentBGMKey === key && !this._bgmPlayers[key].paused) return;
 
-    // 再生中の別曲を停止
+    // 再生中の別曲をフェードアウトして停止（デジタルクリック防止）
     if (this._currentBGMKey && this._currentBGMKey !== key) {
-      const prev = this._bgmPlayers[this._currentBGMKey];
-      prev.pause();
-      prev.currentTime = 0;
+      this._fadeAndStop(this._bgmPlayers[this._currentBGMKey]);
     }
 
     this._currentBGMKey = key;
@@ -85,7 +91,7 @@ class SoundManager {
     if (p) p.catch(() => {});
   }
 
-  /** BGM 停止 */
+  /** BGM 停止（即時） */
   stopBGM() {
     if (this._currentBGMKey) {
       const player = this._bgmPlayers[this._currentBGMKey];
@@ -96,7 +102,7 @@ class SoundManager {
     this._bgmPaused     = false;
   }
 
-  /** BGM 一時停止 */
+  /** BGM 一時停止（即時・タブ非表示など） */
   pauseBGM() {
     if (!this._currentBGMKey) return;
     const player = this._bgmPlayers[this._currentBGMKey];
@@ -119,6 +125,30 @@ class SoundManager {
   playRandomOpening() {
     const key = Math.random() < 0.5 ? 'opening1' : 'opening2';
     this.playBGM(key);
+  }
+
+  /**
+   * BGM をフェードアウトしてから停止する（デジタルクリック防止用）。
+   * BGM 切り替え時のみ使用。ページ離脱や一時停止は即時停止でよい。
+   * @param {HTMLAudioElement} player
+   */
+  _fadeAndStop(player) {
+    if (player.paused) { player.currentTime = 0; return; }
+    const targetKey  = this._currentBGMKey; // フェード開始時点のキーを保存
+    const startVol   = player.volume;
+    const STEPS      = 8;
+    const INTERVAL   = 10; // ms（合計80ms）
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      player.volume = startVol * (1 - step / STEPS);
+      if (step >= STEPS) {
+        clearInterval(timer);
+        player.pause();
+        player.currentTime = 0;
+        player.volume = this._muted ? 0 : this._bgmVolume; // ミュート状態を考慮して音量を復元
+      }
+    }, INTERVAL);
   }
 
   /**
@@ -160,46 +190,23 @@ class SoundManager {
 
   /**
    * Web Audio API を初期化して SE ファイルを事前デコードする。
-   * 同時に全 BGM 要素の iOS ロックを解除する（play → pause を一括実行）。
    * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと。
+   *
+   * BGM のバルクアンロック（全曲同時 play）はここでは行わない。
+   * playBGM() はこのメソッドの直後に同期的に呼ばれるため、
+   * ユーザージェスチャーコンテキスト内で実行されて iOS の制限が自然に解除される。
+   * バルクアンロックは iOS オーディオエンジンに過負荷をかけてノイズを引き起こすため廃止した。
    */
   initAudioContext() {
-    // --- SE: Web Audio API 初期化 ---
-    if (!this._audioCtx) {
-      try {
-        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        this._seGainNode = this._audioCtx.createGain();
-        this._seGainNode.gain.value = this._seVolume;
-        this._seGainNode.connect(this._audioCtx.destination);
-        this._decodeSEBuffers();
-      } catch (e) {
-        // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
-      }
-    }
-
-    // --- BGM: iOS Safari のオーディオロックを解除する ---
-    // iOS では JS 生成の <audio> も初回再生にユーザー操作が必要。
-    // ユーザー操作のコールバック内で play() を呼ぶことでロックが解除される。
-    //
-    // 【注意】競合状態の回避について
-    // initAudioContext() の直後に goToTitle() → playBGM(key) が同期的に呼ばれる。
-    // このため .then() が発火するのは playBGM() が _currentBGMKey をセットした後になる。
-    // .then() 内で _currentBGMKey と key を比較し、再生中の曲は pause しないことで
-    // 「unlock の pause が BGM を止めてしまう」競合を防ぐ。
-    // また、unlock 中の音声ブリップを防ぐため volume=0 でサイレント再生する。
-    for (const [key, player] of Object.entries(this._bgmPlayers)) {
-      player.volume = 0;
-      const p = player.play();
-      if (p) p.then(() => {
-        player.volume = this._bgmVolume;
-        // 再生中の BGM だけは pause しない（競合防止）
-        if (this._currentBGMKey !== key) {
-          player.pause();
-          player.currentTime = 0;
-        }
-      }).catch(() => {
-        player.volume = this._bgmVolume;
-      });
+    if (this._audioCtx) return; // 二重初期化防止
+    try {
+      this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      this._seGainNode = this._audioCtx.createGain();
+      this._seGainNode.gain.value = this._seVolume;
+      this._seGainNode.connect(this._audioCtx.destination);
+      this._decodeSEBuffers();
+    } catch (e) {
+      // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
     }
   }
 
