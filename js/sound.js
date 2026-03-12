@@ -3,7 +3,8 @@
  * BGM・SE の再生管理、WakeLock、Page Visibility 対応
  *
  * 【主な機能】
- *  - BGM: HTML の <audio> 要素を使ってループ再生
+ *  - BGM: BGM ファイルごとに専用の <audio> 要素を事前生成し src を固定する。
+ *         切り替え時は src を変えず play()/pause() のみ呼ぶ → 再バッファリングなし・即時再生。
  *  - SE: Web Audio API（AudioBufferSourceNode）で低遅延再生
  *       AudioContext 未対応時は new Audio() でフォールバック
  *  - WakeLock API: 画面スリープを防止（スマートフォン向け）
@@ -29,68 +30,86 @@ const BGM_FILES = {
 
 class SoundManager {
   constructor() {
-    this._bgmPlayer  = document.getElementById('bgm-player');
     this._seStart    = document.getElementById('se-start');
     this._seButton   = document.getElementById('se-button');
     this._seSuccess  = document.getElementById('se-success');
     this._seMiss     = document.getElementById('se-miss');
 
-    this._currentBGM  = null;   // 現在再生中の BGM ファイルパス
-    this._bgmPaused   = false;  // タブ非表示時に一時停止した場合 true（BGM再開に使う）
-    this._wakeLock    = null;   // WakeLock オブジェクト（スリープ防止）
-    this._bgmVolume   = 0.75;  // BGM の音量（0.0 〜 1.0）
-    this._seVolume    = 0.8;   // SE の音量（0.0 〜 1.0）
-    this._muted       = false;  // ユーザーが明示的にミュートしているか
-    this._activeSE    = {};     // 再生中の SE インスタンス（型ごとに追跡）
+    this._currentBGMKey = null;   // 現在再生中の BGM キー
+    this._bgmPaused     = false;  // タブ非表示時に一時停止した場合 true（BGM再開に使う）
+    this._wakeLock      = null;   // WakeLock オブジェクト（スリープ防止）
+    this._bgmVolume     = 0.75;   // BGM の音量（0.0 〜 1.0）
+    this._seVolume      = 0.8;    // SE の音量（0.0 〜 1.0）
+    this._muted         = false;  // ユーザーが明示的にミュートしているか
+    this._activeSE      = {};     // 再生中の SE インスタンス（型ごとに追跡）
 
     // Web Audio API（SE の低遅延再生用）
-    this._audioCtx      = null;  // AudioContext（ユーザー操作後に生成）
-    this._seGainNode    = null;  // SE 全体の音量制御ノード
-    this._seBuffers     = {};    // デコード済み AudioBuffer のキャッシュ
+    this._audioCtx   = null;  // AudioContext（ユーザー操作後に生成）
+    this._seGainNode = null;  // SE 全体の音量制御ノード
+    this._seBuffers  = {};    // デコード済み AudioBuffer のキャッシュ
 
-    if (this._bgmPlayer) {
-      this._bgmPlayer.volume = this._bgmVolume;
-      this._bgmPlayer.loop   = true;
+    // BGM ごとに専用 <audio> 要素を生成して src を固定する。
+    // src の切り替えを行わないことで再バッファリングによる遅延を防ぐ。
+    this._bgmPlayers = {};
+    for (const [key, src] of Object.entries(BGM_FILES)) {
+      const audio = new Audio();
+      audio.src     = src;
+      audio.loop    = true;
+      audio.preload = 'auto';
+      audio.volume  = this._bgmVolume;
+      this._bgmPlayers[key] = audio;
     }
 
     this._initVisibility();
     this._initBeforeUnload();
   }
 
-  /** BGM 再生（同じ曲なら再スタートしない） */
+  /** BGM 再生（同じ曲が既に再生中なら何もしない） */
   playBGM(key) {
     if (this._muted) return;
-    const src = BGM_FILES[key];
-    if (!src) return;
-    if (this._currentBGM === src && !this._bgmPlayer.paused) return;
+    if (!this._bgmPlayers[key]) return;
+    if (this._currentBGMKey === key && !this._bgmPlayers[key].paused) return;
 
-    this._currentBGM = src;
-    this._bgmPlayer.src = src;
-    this._bgmPlayer.volume = this._bgmVolume;
-    this._bgmPlayer.loop = true;
-    const p = this._bgmPlayer.play();
+    // 再生中の別曲を停止
+    if (this._currentBGMKey && this._currentBGMKey !== key) {
+      const prev = this._bgmPlayers[this._currentBGMKey];
+      prev.pause();
+      prev.currentTime = 0;
+    }
+
+    this._currentBGMKey = key;
+    const player = this._bgmPlayers[key];
+    player.volume = this._bgmVolume;
+    player.loop   = true;
+    const p = player.play();
     if (p) p.catch(() => {});
   }
 
   /** BGM 停止 */
   stopBGM() {
-    this._bgmPlayer.pause();
-    this._bgmPlayer.currentTime = 0;
-    this._currentBGM = null;
+    if (this._currentBGMKey) {
+      const player = this._bgmPlayers[this._currentBGMKey];
+      player.pause();
+      player.currentTime = 0;
+    }
+    this._currentBGMKey = null;
+    this._bgmPaused     = false;
   }
 
   /** BGM 一時停止 */
   pauseBGM() {
-    if (!this._bgmPlayer.paused) {
-      this._bgmPlayer.pause();
+    if (!this._currentBGMKey) return;
+    const player = this._bgmPlayers[this._currentBGMKey];
+    if (!player.paused) {
+      player.pause();
       this._bgmPaused = true;
     }
   }
 
   /** BGM 再開 */
   resumeBGM() {
-    if (this._bgmPaused && this._currentBGM) {
-      const p = this._bgmPlayer.play();
+    if (this._bgmPaused && this._currentBGMKey) {
+      const p = this._bgmPlayers[this._currentBGMKey].play();
       if (p) p.catch(() => {});
       this._bgmPaused = false;
     }
@@ -140,19 +159,31 @@ class SoundManager {
   }
 
   /**
-   * Web Audio API を初期化して SE ファイルを事前デコードする
-   * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと
+   * Web Audio API を初期化して SE ファイルを事前デコードする。
+   * 同時に全 BGM 要素の iOS ロックを解除する（play → pause を一括実行）。
+   * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと。
    */
   initAudioContext() {
-    if (this._audioCtx) return; // 二重初期化防止
-    try {
-      this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      this._seGainNode = this._audioCtx.createGain();
-      this._seGainNode.gain.value = this._seVolume;
-      this._seGainNode.connect(this._audioCtx.destination);
-      this._decodeSEBuffers();
-    } catch (e) {
-      // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
+    // --- SE: Web Audio API 初期化 ---
+    if (!this._audioCtx) {
+      try {
+        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this._seGainNode = this._audioCtx.createGain();
+        this._seGainNode.gain.value = this._seVolume;
+        this._seGainNode.connect(this._audioCtx.destination);
+        this._decodeSEBuffers();
+      } catch (e) {
+        // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
+      }
+    }
+
+    // --- BGM: iOS Safari のオーディオロックを解除する ---
+    // iOS では JS 生成の <audio> も初回再生にユーザー操作が必要。
+    // ユーザー操作のコールバック内で play() → pause() を呼ぶことでロックが解除され、
+    // 以降の playBGM() 呼び出しで即時再生が可能になる。
+    for (const player of Object.values(this._bgmPlayers)) {
+      const p = player.play();
+      if (p) p.then(() => { player.pause(); player.currentTime = 0; }).catch(() => {});
     }
   }
 
@@ -182,7 +213,9 @@ class SoundManager {
   /** ミュート切り替え */
   toggleMute() {
     this._muted = !this._muted;
-    this._bgmPlayer.muted = this._muted;
+    for (const player of Object.values(this._bgmPlayers)) {
+      player.muted = this._muted;
+    }
     if (this._seGainNode) {
       this._seGainNode.gain.value = this._muted ? 0 : this._seVolume;
     }
