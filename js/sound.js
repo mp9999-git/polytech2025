@@ -85,6 +85,13 @@ class SoundManager {
 
     this._currentBGMKey = key;
     const player = this._bgmPlayers[key];
+
+    // 再生対象 player に進行中のフェードがあればキャンセルして音量を復元
+    if (player._fadeTimer) {
+      clearInterval(player._fadeTimer);
+      player._fadeTimer = null;
+    }
+
     player.volume = this._bgmVolume;
     player.loop   = true;
     const p = player.play();
@@ -133,20 +140,25 @@ class SoundManager {
    * @param {HTMLAudioElement} player
    */
   _fadeAndStop(player) {
+    // 同じ player に対して既存のフェードが動いていればキャンセル
+    if (player._fadeTimer) {
+      clearInterval(player._fadeTimer);
+      player._fadeTimer = null;
+    }
     if (player.paused) { player.currentTime = 0; return; }
-    const targetKey  = this._currentBGMKey; // フェード開始時点のキーを保存
-    const startVol   = player.volume;
-    const STEPS      = 8;
-    const INTERVAL   = 10; // ms（合計80ms）
+    const startVol = player.volume;
+    const STEPS    = 8;
+    const INTERVAL = 10; // ms（合計80ms）
     let step = 0;
-    const timer = setInterval(() => {
+    player._fadeTimer = setInterval(() => {
       step++;
       player.volume = startVol * (1 - step / STEPS);
       if (step >= STEPS) {
-        clearInterval(timer);
+        clearInterval(player._fadeTimer);
+        player._fadeTimer = null;
         player.pause();
         player.currentTime = 0;
-        player.volume = this._muted ? 0 : this._bgmVolume; // ミュート状態を考慮して音量を復元
+        player.volume = this._muted ? 0 : this._bgmVolume;
       }
     }, INTERVAL);
   }
