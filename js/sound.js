@@ -152,11 +152,11 @@ class SoundManager {
    * バックグラウンドでデコードが進み、ゲーム中の BGM 切り替えを即時にする。
    */
   preloadRemainingBGM() {
-    const OPENING_KEYS = new Set(['opening1', 'opening2']);
-    for (const [key, src] of Object.entries(BGM_FILES)) {
-      if (OPENING_KEYS.has(key)) continue;
+    // 即時再生が求められる順にバッファリング開始（team/edit はオンデマンド生成のため除外）
+    const PRIORITY_KEYS = ['name_input', 'introduction', 'quiz', 'clear', 'ending_happy', 'ending_normal'];
+    for (const key of PRIORITY_KEYS) {
       if (this._bgmPlayers[key]) continue; // 既に生成済みならスキップ
-      const audio = new Audio(src);
+      const audio = new Audio(BGM_FILES[key]);
       audio.loop    = true;
       audio.preload = 'auto';
       audio.volume  = this._bgmVolume;
