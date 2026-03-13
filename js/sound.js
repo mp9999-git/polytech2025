@@ -3,8 +3,9 @@
  * BGM・SE の再生管理、WakeLock、Page Visibility 対応
  *
  * 【主な機能】
- *  - BGM: playBGM() 呼び出し時に初めて new Audio() を生成（遅延初期化）。
- *         一度生成した Audio オブジェクトはキャッシュして再利用する。
+ *  - BGM: 2段階プリロード。
+ *         Phase1（起動直後）: opening1/opening2 を preload='auto' で即時生成・バッファリング開始。
+ *         Phase2（モード選択画面表示時）: 残り8曲を preloadRemainingBGM() で生成・バッファリング開始。
  *         切り替え時は短いフェードアウト（80ms）を挟んでデジタルクリックを防止する。
  *  - SE: Web Audio API（AudioBufferSourceNode）で低遅延再生
  *       AudioContext 未対応時は new Audio() でフォールバック
@@ -18,8 +19,8 @@
  * 【iOS Safari のオーディオ制限について】
  *  iOS はユーザー操作（タップ等）なしに音声を再生できない。
  *  initAudioContext() をモード選択ボタンのハンドラ内で呼ぶことで AudioContext を解除する。
- *  opening BGM は initAudioContext() 内で事前生成・load() し、HTTP キャッシュから高速バッファリング。
- *  他 BGM は playBGM() 呼び出し時に遅延生成する（loading.js の fetch() で HTTP キャッシュ済み）。
+ *  opening1/2 はコンストラクタで即時生成 → プリロード画面の期間でバッファリング完了を狙う。
+ *  iOS は preload を無視するため、initAudioContext()（gesture 内）で opening BGM の load() を呼ぶ。
  *  全 BGM の一括 play()→pause() はノイズの原因になるため廃止した。
  */
 
@@ -56,9 +57,17 @@ class SoundManager {
     this._seGainNode = null;  // SE 全体の音量制御ノード
     this._seBuffers  = {};    // デコード済み AudioBuffer のキャッシュ
 
-    // BGM は playBGM() 呼び出し時に遅延生成してキャッシュする。
-    // 起動時の全曲プリロードは行わない（iOS 負荷軽減のため）。
+    // BGM Phase1: opening1/opening2 を起動直後に生成してバッファリング開始。
+    // プリロード画面の全期間（数秒）を使ってデコードを完了させ、モード選択直後に即再生できるようにする。
+    // 残り8曲は preloadRemainingBGM()（モード選択画面表示時）で生成する。
     this._bgmPlayers = {};
+    for (const key of ['opening1', 'opening2']) {
+      const audio = new Audio(BGM_FILES[key]);
+      audio.loop    = true;
+      audio.preload = 'auto';
+      audio.volume  = this._bgmVolume;
+      this._bgmPlayers[key] = audio;
+    }
 
     this._initVisibility();
     this._initBeforeUnload();
@@ -77,12 +86,11 @@ class SoundManager {
 
     this._currentBGMKey = key;
 
-    // 未生成なら new Audio() で遅延生成してキャッシュ
+    // コンストラクタで全曲生成済みのはずだが、念のため未生成の場合はここで生成
     if (!this._bgmPlayers[key]) {
       const audio = new Audio(BGM_FILES[key]);
-      audio.loop    = true;
-      audio.volume  = this._bgmVolume;
-      audio.preload = 'auto'; // HTTP キャッシュからの読み込みを即開始
+      audio.loop   = true;
+      audio.volume = this._bgmVolume;
       this._bgmPlayers[key] = audio;
     }
 
@@ -136,6 +144,24 @@ class SoundManager {
   playRandomOpening() {
     const key = Math.random() < 0.5 ? 'opening1' : 'opening2';
     this.playBGM(key);
+  }
+
+  /**
+   * BGM Phase2: opening1/2 以外の残り8曲を生成してバッファリング開始。
+   * モード選択画面が表示された時点で呼ぶことで、ユーザーがモードを選ぶ間に
+   * バックグラウンドでデコードが進み、ゲーム中の BGM 切り替えを即時にする。
+   */
+  preloadRemainingBGM() {
+    const OPENING_KEYS = new Set(['opening1', 'opening2']);
+    for (const [key, src] of Object.entries(BGM_FILES)) {
+      if (OPENING_KEYS.has(key)) continue;
+      if (this._bgmPlayers[key]) continue; // 既に生成済みならスキップ
+      const audio = new Audio(src);
+      audio.loop    = true;
+      audio.preload = 'auto';
+      audio.volume  = this._bgmVolume;
+      this._bgmPlayers[key] = audio;
+    }
   }
 
   /**
@@ -208,10 +234,10 @@ class SoundManager {
    * Web Audio API を初期化して SE ファイルを事前デコードする。
    * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと。
    *
-   * タイトル画面で再生する opening BGM（2曲）をここで事前生成し load() を呼ぶ。
-   * iOS Safari はユーザージェスチャー内で load() を呼ぶことでバッファリングを開始できる。
-   * loading 画面の fetch() で HTTP キャッシュ済みのため、バッファリングは高速に完了する。
-   * このメソッド直後に playBGM() が呼ばれるため、Audio 要素はすでに存在して即再生できる。
+   * opening BGM（2曲）はコンストラクタで既に生成済みだが、iOS は preload='auto' を
+   * ジェスチャー前は無視するため、ここで load() を呼んでバッファリングを明示的に開始する。
+   * このメソッド直後に playBGM() が呼ばれるため、デスクトップ/Android は即再生、
+   * iOS もバッファリングが始まっているため最短で再生できる。
    *
    * ※ 全 BGM の一括 play()→pause()（旧バルクアンロック）は廃止。
    *    iOS オーディオエンジンに過負荷をかけてノイズを引き起こすため。
@@ -228,16 +254,10 @@ class SoundManager {
       // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
     }
 
-    // ユーザージェスチャー内で opening BGM を事前生成・バッファリング開始（iOS 対応）
+    // iOS 対応: ジェスチャー内で opening BGM の load() を呼びバッファリングを許可・開始
+    // iOS は preload='auto' をジェスチャー前は無視するため、ここで明示的に呼ぶ必要がある
     for (const key of ['opening1', 'opening2']) {
-      if (!this._bgmPlayers[key]) {
-        const audio = new Audio(BGM_FILES[key]);
-        audio.loop    = true;
-        audio.volume  = this._bgmVolume;
-        audio.preload = 'auto';
-        audio.load(); // iOS: ジェスチャー内で呼ぶことでバッファリングを許可・開始
-        this._bgmPlayers[key] = audio;
-      }
+      if (this._bgmPlayers[key]) this._bgmPlayers[key].load();
     }
   }
 

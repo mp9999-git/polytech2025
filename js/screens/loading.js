@@ -202,6 +202,9 @@ class LoadingScreen {
   /** モード選択オーバーレイ表示 */
   _showModeSelect() {
     this._overlay.classList.remove('hidden');
+    // BGM Phase2: opening1/2 以外の残り8曲のバッファリングを開始
+    // モードを選ぶ間にデコードが進み、ゲーム中の BGM 切り替えが即時になる
+    this._app.sound.preloadRemainingBGM();
 
     // iOS Safari判定：スタンドアロンモード未起動なら使用方法ヒントを表示
     if (this._isIOS() && !this._isStandalone()) {
