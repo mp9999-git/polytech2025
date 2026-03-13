@@ -2,26 +2,26 @@
  * sound.js - SoundManager
  * BGM・SE の再生管理、WakeLock、Page Visibility 対応
  *
- * 【BGM 再生方式】
- *  Web Audio API（AudioBufferSourceNode）を使用。
- *  fetch + decodeAudioData で MP3 を PCM デコードし AudioBuffer に保存後、即時再生。
- *  HTTP キャッシュはローディング画面の fetch().blob() で先行充填されているため、
- *  ジェスチャー後の fetch はキャッシュヒットし、decodeAudioData のみ待てばよい。
- *
- * 【デコードタイミング】
- *  Phase1（initAudioContext 直後）: opening1/opening2 を最優先でデコード開始。
- *  Phase2（モード選択画面）: name_input→introduction→quiz→clear→ending_happy→ending_normal
- *  オンデマンド（playBGM 呼び出し時）: team, edit
+ * 【主な機能】
+ *  - BGM: 2段階プリロード。
+ *         Phase1（起動直後）: opening1/opening2 を preload='auto' で即時生成・バッファリング開始。
+ *         Phase2（モード選択画面表示時）: 残り8曲を preloadRemainingBGM() で生成・バッファリング開始。
+ *         切り替え時は短いフェードアウト（80ms）を挟んでデジタルクリックを防止する。
+ *  - SE: Web Audio API（AudioBufferSourceNode）で低遅延再生
+ *       AudioContext 未対応時は new Audio() でフォールバック
+ *  - WakeLock API: 画面スリープを防止（スマートフォン向け）
+ *  - Page Visibility API: タブを非表示にした時に BGM を自動一時停止・復帰
  *
  * 【_bgmPaused と _muted の違い】
  *  - _bgmPaused: タブ非表示など「システム都合」で一時停止した状態（再表示時に自動再開）
  *  - _muted: ユーザーが明示的にミュートした状態（自動解除しない）
  *
- * 【iOS Safari の制限と対策】
- *  AudioContext はユーザー操作後（initAudioContext）に生成する。
- *  生成直後に fetch + decodeAudioData を開始し、モード選択→タイトル画面への
- *  フェード遷移（~250ms）の間にデコードを完了させることで即時再生を実現する。
- *  HTMLAudioElement の preload='auto' が iOS では無視される問題を根本回避する。
+ * 【iOS Safari のオーディオ制限について】
+ *  iOS はユーザー操作（タップ等）なしに音声を再生できない。
+ *  initAudioContext() をモード選択ボタンのハンドラ内で呼ぶことで AudioContext を解除する。
+ *  opening1/2 はコンストラクタで即時生成 → プリロード画面の期間でバッファリング完了を狙う。
+ *  iOS は preload を無視するため、initAudioContext()（gesture 内）で opening BGM の load() を呼ぶ。
+ *  全 BGM の一括 play()→pause() はノイズの原因になるため廃止した。
  */
 
 const BGM_FILES = {
@@ -39,88 +39,105 @@ const BGM_FILES = {
 
 class SoundManager {
   constructor() {
-    this._seStart   = document.getElementById('se-start');
-    this._seButton  = document.getElementById('se-button');
-    this._seSuccess = document.getElementById('se-success');
-    this._seMiss    = document.getElementById('se-miss');
+    this._seStart    = document.getElementById('se-start');
+    this._seButton   = document.getElementById('se-button');
+    this._seSuccess  = document.getElementById('se-success');
+    this._seMiss     = document.getElementById('se-miss');
 
-    // 状態フラグ
-    this._currentBGMKey = null;  // 現在再生中の BGM キー
-    this._bgmPaused     = false; // タブ非表示で一時停止中か
-    this._wakeLock      = null;  // WakeLock オブジェクト
-    this._bgmVolume     = 0.75;  // BGM 音量（0.0〜1.0）
-    this._seVolume      = 0.8;   // SE 音量（0.0〜1.0）
-    this._muted         = false; // ユーザーによるミュート状態
-    this._activeSE      = {};    // SE フォールバック用インスタンス（型ごとに追跡）
+    this._currentBGMKey = null;   // 現在再生中の BGM キー
+    this._bgmPaused     = false;  // タブ非表示時に一時停止した場合 true（BGM再開に使う）
+    this._wakeLock      = null;   // WakeLock オブジェクト（スリープ防止）
+    this._bgmVolume     = 0.75;   // BGM の音量（0.0 〜 1.0）
+    this._seVolume      = 0.8;    // SE の音量（0.0 〜 1.0）
+    this._muted         = false;  // ユーザーが明示的にミュートしているか
+    this._activeSE      = {};     // 再生中の SE インスタンス（型ごとに追跡）
 
-    // Web Audio API（BGM・SE 共用）
-    this._audioCtx    = null; // AudioContext（ジェスチャー後に生成）
-    this._bgmGainNode = null; // BGM 全体の音量制御 GainNode
-    this._seGainNode  = null; // SE 全体の音量制御 GainNode
-    this._seBuffers   = {};   // デコード済み SE の AudioBuffer
+    // Web Audio API（SE の低遅延再生用）
+    this._audioCtx   = null;  // AudioContext（ユーザー操作後に生成）
+    this._seGainNode = null;  // SE 全体の音量制御ノード
+    this._seBuffers  = {};    // デコード済み AudioBuffer のキャッシュ
 
-    // BGM 管理
-    this._bgmBuffers        = {};   // デコード済み BGM の AudioBuffer（key → AudioBuffer）
-    this._bgmDecoding       = {};   // デコード中の Promise（key → Promise）
-    this._pendingDecodeKeys = [];   // AudioContext 生成前のデコード待ちキュー
-    this._bgmSource         = null; // 現在再生中の AudioBufferSourceNode
-    this._playToken         = null; // async playBGM のキャンセルトークン
+    // BGM Phase1: opening1/opening2 を起動直後に生成してバッファリング開始。
+    // プリロード画面の全期間（数秒）を使ってデコードを完了させ、モード選択直後に即再生できるようにする。
+    // 残り8曲は preloadRemainingBGM()（モード選択画面表示時）で生成する。
+    this._bgmPlayers = {};
+    for (const key of ['opening1', 'opening2']) {
+      const audio = new Audio(BGM_FILES[key]);
+      audio.loop    = true;
+      audio.preload = 'auto';
+      audio.volume  = this._bgmVolume;
+      this._bgmPlayers[key] = audio;
+    }
 
     this._initVisibility();
     this._initBeforeUnload();
   }
 
-  // ─────────────────────────────── BGM ───────────────────────────────
-
   /** BGM 再生（同じ曲が既に再生中なら何もしない） */
-  async playBGM(key) {
+  playBGM(key) {
     if (this._muted) return;
     if (!BGM_FILES[key]) return;
-    if (this._currentBGMKey === key && this._bgmSource) return;
-    if (!this._audioCtx) return; // initAudioContext() 前は再生不可
+    if (this._currentBGMKey === key && this._bgmPlayers[key] && !this._bgmPlayers[key].paused) return;
 
-    const token = Symbol();
-    this._playToken     = token;
+    // 再生中の別曲をフェードアウトして停止（デジタルクリック防止）
+    if (this._currentBGMKey && this._currentBGMKey !== key && this._bgmPlayers[this._currentBGMKey]) {
+      this._fadeAndStop(this._bgmPlayers[this._currentBGMKey]);
+    }
+
     this._currentBGMKey = key;
 
-    // 再生中の曲を 80ms フェードアウトして停止
-    await this._fadeAndStopCurrent();
-    if (this._playToken !== token) return; // 別の playBGM に上書きされた
-
-    // バッファ未デコードの場合は完了を待つ
-    // HTTP キャッシュ済みなら fetch は即完了・decodeAudioData のみ待機
-    if (!this._bgmBuffers[key]) {
-      if (!this._bgmDecoding[key]) this._startDecodeBGM(key);
-      try { await this._bgmDecoding[key]; } catch { return; }
+    // コンストラクタで全曲生成済みのはずだが、念のため未生成の場合はここで生成
+    if (!this._bgmPlayers[key]) {
+      const audio = new Audio(BGM_FILES[key]);
+      audio.loop   = true;
+      audio.volume = this._bgmVolume;
+      this._bgmPlayers[key] = audio;
     }
-    if (this._playToken !== token) return;
 
-    this._startBGMSource(key);
+    const player = this._bgmPlayers[key];
+
+    // 再生対象 player に進行中のフェードがあればキャンセルして音量を復元
+    if (player._fadeTimer) {
+      clearInterval(player._fadeTimer);
+      player._fadeTimer = null;
+    }
+
+    player.volume = this._bgmVolume;
+    player.loop   = true;
+    const p = player.play();
+    if (p) p.catch(() => {});
   }
 
   /** BGM 停止（即時） */
   stopBGM() {
-    this._playToken = null;
-    this._stopBGMSource();
+    if (this._currentBGMKey) {
+      const player = this._bgmPlayers[this._currentBGMKey];
+      if (player) { player.pause(); player.currentTime = 0; }
+    }
     this._currentBGMKey = null;
     this._bgmPaused     = false;
   }
 
-  /**
-   * BGM 一時停止（タブ非表示など）
-   * AudioContext ごと suspend することで再生位置を保持したまま停止する
-   */
+  /** BGM 一時停止（即時・タブ非表示など） */
   pauseBGM() {
-    if (!this._audioCtx || this._bgmPaused) return;
-    this._audioCtx.suspend();
-    this._bgmPaused = true;
+    if (!this._currentBGMKey) return;
+    const player = this._bgmPlayers[this._currentBGMKey];
+    if (player && !player.paused) {
+      player.pause();
+      this._bgmPaused = true;
+    }
   }
 
   /** BGM 再開 */
   resumeBGM() {
-    if (!this._bgmPaused || !this._audioCtx) return;
-    this._audioCtx.resume();
-    this._bgmPaused = false;
+    if (this._bgmPaused && this._currentBGMKey) {
+      const player = this._bgmPlayers[this._currentBGMKey];
+      if (player) {
+        const p = player.play();
+        if (p) p.catch(() => {});
+      }
+      this._bgmPaused = false;
+    }
   }
 
   /** オープニング曲をランダムに再生 */
@@ -130,138 +147,51 @@ class SoundManager {
   }
 
   /**
-   * BGM Phase2: 6曲を優先度順にデコードキューへ追加。
-   * AudioContext 未生成の場合はキューに積み、initAudioContext() 後にデコード開始する。
-   * モード選択画面が表示された時点で呼ぶ。
+   * BGM Phase2: opening1/2 以外の残り8曲を生成してバッファリング開始。
+   * モード選択画面が表示された時点で呼ぶことで、ユーザーがモードを選ぶ間に
+   * バックグラウンドでデコードが進み、ゲーム中の BGM 切り替えを即時にする。
    */
   preloadRemainingBGM() {
+    // 即時再生が求められる順にバッファリング開始（team/edit はオンデマンド生成のため除外）
     const PRIORITY_KEYS = ['name_input', 'introduction', 'quiz', 'clear', 'ending_happy', 'ending_normal'];
     for (const key of PRIORITY_KEYS) {
-      if (this._bgmBuffers[key] || this._bgmDecoding[key] || this._pendingDecodeKeys.includes(key)) continue;
-      this._pendingDecodeKeys.push(key);
-    }
-    // AudioContext が既に存在する場合（通常は起こらないが念のため）は即デコード開始
-    if (this._audioCtx) this._processPendingDecodes();
-  }
-
-  /**
-   * Web Audio API を初期化して BGM・SE のデコードを開始する。
-   * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと。
-   */
-  initAudioContext() {
-    if (this._audioCtx) return; // 二重初期化防止
-    try {
-      this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      // iOS Safari は AudioContext を 'suspended' 状態で生成することがある
-      // ジェスチャー内で resume() を呼ぶことで確実に 'running' 状態にする
-      this._audioCtx.resume().catch(() => {});
-
-      this._bgmGainNode = this._audioCtx.createGain();
-      this._bgmGainNode.gain.value = this._bgmVolume;
-      this._bgmGainNode.connect(this._audioCtx.destination);
-
-      this._seGainNode = this._audioCtx.createGain();
-      this._seGainNode.gain.value = this._seVolume;
-      this._seGainNode.connect(this._audioCtx.destination);
-
-      // SE デコード開始
-      this._decodeSEBuffers();
-
-      // BGM Phase1: opening1/2 を最優先でデコード開始
-      this._startDecodeBGM('opening1');
-      this._startDecodeBGM('opening2');
-
-      // BGM Phase2: preloadRemainingBGM() でキュー済みの曲をデコード開始
-      this._processPendingDecodes();
-    } catch (e) {
-      // Web Audio API 非対応環境では何もしない（SE フォールバックで動作継続）
-    }
-  }
-
-  // ─────────────────────────── BGM 内部メソッド ───────────────────────────
-
-  /** キュー済みキーのデコードを順に開始する */
-  _processPendingDecodes() {
-    for (const key of this._pendingDecodeKeys) {
-      this._startDecodeBGM(key);
-    }
-    this._pendingDecodeKeys = [];
-  }
-
-  /**
-   * BGM を fetch + decodeAudioData してキャッシュする。
-   * ローディング画面の fetch().blob() によって HTTP キャッシュが充填済みのため
-   * fetch は通常キャッシュヒットし、decodeAudioData の CPU 時間のみ待てばよい。
-   */
-  _startDecodeBGM(key) {
-    if (this._bgmDecoding[key] || this._bgmBuffers[key] || !this._audioCtx) return;
-    const promise = fetch(BGM_FILES[key])
-      .then(r => r.arrayBuffer())
-      // コールバック形式を使用（Promise 形式が古い iOS Safari で未対応のため）
-      .then(buf => new Promise((resolve, reject) => {
-        this._audioCtx.decodeAudioData(buf, resolve, reject);
-      }))
-      .then(decoded => { this._bgmBuffers[key] = decoded; })
-      .catch(() => {})
-      .finally(() => { delete this._bgmDecoding[key]; });
-    this._bgmDecoding[key] = promise;
-  }
-
-  /** AudioBufferSourceNode を生成して BGM 再生を開始する */
-  _startBGMSource(key) {
-    if (!this._bgmBuffers[key] || !this._audioCtx || !this._bgmGainNode) return;
-    // suspended 状態のまま start() しても無音になるため確実に resume する
-    if (this._audioCtx.state === 'suspended') this._audioCtx.resume().catch(() => {});
-    const source = this._audioCtx.createBufferSource();
-    source.buffer = this._bgmBuffers[key];
-    source.loop   = true;
-    source.connect(this._bgmGainNode);
-    source.start(0);
-    this._bgmSource = source;
-  }
-
-  /** 現在の BGM ソースノードを即時停止する */
-  _stopBGMSource() {
-    if (this._bgmSource) {
-      try { this._bgmSource.stop(); } catch { }
-      this._bgmSource = null;
+      if (this._bgmPlayers[key]) continue; // 既に生成済みならスキップ
+      const audio = new Audio(BGM_FILES[key]);
+      audio.loop    = true;
+      audio.preload = 'auto';
+      audio.volume  = this._bgmVolume;
+      this._bgmPlayers[key] = audio;
     }
   }
 
   /**
-   * 現在の BGM を 80ms でフェードアウトして停止する。
-   * 停止後に gain を bgmVolume に復元してから Promise を解決する。
-   * これにより次の BGM は通常音量で即時開始できる。
+   * BGM をフェードアウトしてから停止する（デジタルクリック防止用）。
+   * BGM 切り替え時のみ使用。ページ離脱や一時停止は即時停止でよい。
+   * @param {HTMLAudioElement} player
    */
-  _fadeAndStopCurrent() {
-    return new Promise(resolve => {
-      if (!this._bgmSource) { resolve(); return; }
-      const source = this._bgmSource;
-      this._bgmSource = null;
-
-      if (!this._audioCtx || !this._bgmGainNode) {
-        try { source.stop(); } catch { }
-        resolve();
-        return;
+  _fadeAndStop(player) {
+    // 同じ player に対して既存のフェードが動いていればキャンセル
+    if (player._fadeTimer) {
+      clearInterval(player._fadeTimer);
+      player._fadeTimer = null;
+    }
+    if (player.paused) { player.currentTime = 0; return; }
+    const startVol = player.volume;
+    const STEPS    = 8;
+    const INTERVAL = 10; // ms（合計80ms）
+    let step = 0;
+    player._fadeTimer = setInterval(() => {
+      step++;
+      player.volume = startVol * (1 - step / STEPS);
+      if (step >= STEPS) {
+        clearInterval(player._fadeTimer);
+        player._fadeTimer = null;
+        player.pause();
+        player.currentTime = 0;
+        player.volume = this._muted ? 0 : this._bgmVolume;
       }
-
-      const now = this._audioCtx.currentTime;
-      this._bgmGainNode.gain.cancelScheduledValues(now);
-      this._bgmGainNode.gain.setValueAtTime(this._bgmGainNode.gain.value, now);
-      this._bgmGainNode.gain.linearRampToValueAtTime(0, now + 0.08); // 80ms
-
-      setTimeout(() => {
-        try { source.stop(); } catch { }
-        // 次の BGM のために gain を復元（ミュート中は 0 のまま）
-        if (this._audioCtx && !this._muted) {
-          this._bgmGainNode.gain.setValueAtTime(this._bgmVolume, this._audioCtx.currentTime);
-        }
-        resolve();
-      }, 90);
-    });
+    }, INTERVAL);
   }
-
-  // ─────────────────────────────── SE ───────────────────────────────
 
   /**
    * SE 再生
@@ -292,7 +222,7 @@ class SoundManager {
     }
     if (!src) return;
     const prev = this._activeSE[type];
-    if (prev) prev.pause();
+    if (prev) { prev.pause(); }
     const audio = new Audio(src);
     audio.volume = this._seVolume;
     this._activeSE[type] = audio;
@@ -301,8 +231,39 @@ class SoundManager {
   }
 
   /**
-   * SE ファイルを fetch して AudioBuffer にデコードしキャッシュする。
-   * ローディング画面で既に HTTP キャッシュに入っているため fetch は高速。
+   * Web Audio API を初期化して SE ファイルを事前デコードする。
+   * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと。
+   *
+   * opening BGM（2曲）はコンストラクタで既に生成済みだが、iOS は preload='auto' を
+   * ジェスチャー前は無視するため、ここで load() を呼んでバッファリングを明示的に開始する。
+   * このメソッド直後に playBGM() が呼ばれるため、デスクトップ/Android は即再生、
+   * iOS もバッファリングが始まっているため最短で再生できる。
+   *
+   * ※ 全 BGM の一括 play()→pause()（旧バルクアンロック）は廃止。
+   *    iOS オーディオエンジンに過負荷をかけてノイズを引き起こすため。
+   */
+  initAudioContext() {
+    if (this._audioCtx) return; // 二重初期化防止
+    try {
+      this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      this._seGainNode = this._audioCtx.createGain();
+      this._seGainNode.gain.value = this._seVolume;
+      this._seGainNode.connect(this._audioCtx.destination);
+      this._decodeSEBuffers();
+    } catch (e) {
+      // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
+    }
+
+    // iOS 対応: ジェスチャー内で opening BGM の load() を呼びバッファリングを許可・開始
+    // iOS は preload='auto' をジェスチャー前は無視するため、ここで明示的に呼ぶ必要がある
+    for (const key of ['opening1', 'opening2']) {
+      if (this._bgmPlayers[key]) this._bgmPlayers[key].load();
+    }
+  }
+
+  /**
+   * SE ファイルを fetch して AudioBuffer にデコードしキャッシュする
+   * ローディング画面で既に HTTP キャッシュに入っているため fetch は高速
    */
   async _decodeSEBuffers() {
     const SE_FILES = {
@@ -316,24 +277,18 @@ class SoundManager {
       try {
         const res = await fetch(src);
         const buf = await res.arrayBuffer();
-        this._seBuffers[key] = await new Promise((resolve, reject) => {
-          this._audioCtx.decodeAudioData(buf, resolve, reject);
-        });
-      } catch {
+        this._seBuffers[key] = await this._audioCtx.decodeAudioData(buf);
+      } catch (e) {
         // デコード失敗時はフォールバックが使われるため無視
       }
     }));
   }
 
-  // ─────────────────── ミュート / WakeLock / Visibility ───────────────────
-
   /** ミュート切り替え */
   toggleMute() {
     this._muted = !this._muted;
-    if (this._bgmGainNode) {
-      const now = this._audioCtx.currentTime;
-      this._bgmGainNode.gain.cancelScheduledValues(now);
-      this._bgmGainNode.gain.setValueAtTime(this._muted ? 0 : this._bgmVolume, now);
+    for (const player of Object.values(this._bgmPlayers)) {
+      player.muted = this._muted;
     }
     if (this._seGainNode) {
       this._seGainNode.gain.value = this._muted ? 0 : this._seVolume;
@@ -345,8 +300,12 @@ class SoundManager {
     if (!('wakeLock' in navigator)) return;
     try {
       this._wakeLock = await navigator.wakeLock.request('screen');
-      this._wakeLock.addEventListener('release', () => { this._wakeLock = null; });
-    } catch { }
+      this._wakeLock.addEventListener('release', () => {
+        this._wakeLock = null;
+      });
+    } catch (e) {
+      // WakeLock 非対応またはエラー時は無視
+    }
   }
 
   /** WakeLock 解放 */
@@ -357,7 +316,7 @@ class SoundManager {
     }
   }
 
-  /** Page Visibility API: タブ非表示時に BGM を一時停止 */
+  /** Page Visibility API: タブ非表示時にBGM停止 */
   _initVisibility() {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
@@ -370,7 +329,7 @@ class SoundManager {
     });
   }
 
-  /** ページを閉じる・移動する時に BGM 停止 */
+  /** ページを閉じる・移動する時にBGM停止 */
   _initBeforeUnload() {
     window.addEventListener('pagehide', () => {
       this.stopBGM();
