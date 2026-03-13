@@ -152,6 +152,9 @@ class SoundManager {
     if (this._audioCtx) return; // 二重初期化防止
     try {
       this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      // iOS Safari は AudioContext を 'suspended' 状態で生成することがある
+      // ジェスチャー内で resume() を呼ぶことで確実に 'running' 状態にする
+      this._audioCtx.resume().catch(() => {});
 
       this._bgmGainNode = this._audioCtx.createGain();
       this._bgmGainNode.gain.value = this._bgmVolume;
@@ -194,7 +197,10 @@ class SoundManager {
     if (this._bgmDecoding[key] || this._bgmBuffers[key] || !this._audioCtx) return;
     const promise = fetch(BGM_FILES[key])
       .then(r => r.arrayBuffer())
-      .then(buf => this._audioCtx.decodeAudioData(buf))
+      // コールバック形式を使用（Promise 形式が古い iOS Safari で未対応のため）
+      .then(buf => new Promise((resolve, reject) => {
+        this._audioCtx.decodeAudioData(buf, resolve, reject);
+      }))
       .then(decoded => { this._bgmBuffers[key] = decoded; })
       .catch(() => {})
       .finally(() => { delete this._bgmDecoding[key]; });
@@ -204,6 +210,8 @@ class SoundManager {
   /** AudioBufferSourceNode を生成して BGM 再生を開始する */
   _startBGMSource(key) {
     if (!this._bgmBuffers[key] || !this._audioCtx || !this._bgmGainNode) return;
+    // suspended 状態のまま start() しても無音になるため確実に resume する
+    if (this._audioCtx.state === 'suspended') this._audioCtx.resume().catch(() => {});
     const source = this._audioCtx.createBufferSource();
     source.buffer = this._bgmBuffers[key];
     source.loop   = true;
@@ -308,7 +316,9 @@ class SoundManager {
       try {
         const res = await fetch(src);
         const buf = await res.arrayBuffer();
-        this._seBuffers[key] = await this._audioCtx.decodeAudioData(buf);
+        this._seBuffers[key] = await new Promise((resolve, reject) => {
+          this._audioCtx.decodeAudioData(buf, resolve, reject);
+        });
       } catch {
         // デコード失敗時はフォールバックが使われるため無視
       }
