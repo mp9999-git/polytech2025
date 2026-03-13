@@ -57,6 +57,9 @@ class App {
     // 現在表示中の画面名（初期値はなし）
     this._currentScreen = null;
 
+    // 画面遷移アニメーション中フラグ（連打による二重遷移を防止）
+    this._transitioning = false;
+
     // スケーリング初期化（ウィンドウサイズに合わせて拡縮）
     this._initScaling();
 
@@ -153,20 +156,59 @@ class App {
 
   /** ストーリー画面へ（category: 'Network' など） */
   goToStory(category) {
-    this._showScreen('story');
-    this._screens.story.show(category);
+    if (this._currentScreen === 'quiz') {
+      // クイズ → 次ステージストーリー: 前景のみアニメーション（背景共有でシームレス）
+      this._foregroundTransition(
+        'quiz-foreground', 'anim-exit-to-left',
+        () => { this._showScreen('story'); this._screens.story.show(category); },
+        'story-foreground', 'anim-slide-in-right',
+        300
+      );
+    } else {
+      // 名前入力 → 初回ストーリー: 黒フェード
+      this._fadeTransition(
+        () => { this._showScreen('story'); this._screens.story.show(category); },
+        'story-foreground', 'anim-slide-in-right',
+        220, 350
+      );
+    }
   }
 
   /** クイズ画面へ */
   goToQuiz(category) {
-    this._showScreen('quiz');
-    this._screens.quiz.show(category);
+    if (this._currentScreen === 'story') {
+      // ストーリー → クイズ: 前景のみアニメーション（背景共有でシームレス）
+      this._foregroundTransition(
+        'story-foreground', 'anim-exit-to-left',
+        () => { this._showScreen('quiz'); this._screens.quiz.show(category); },
+        'quiz-foreground', 'anim-enter-scale-up',
+        300
+      );
+    } else {
+      // 直接入場（続きから等）: 黒フェード
+      this._fadeTransition(
+        () => { this._showScreen('quiz'); this._screens.quiz.show(category); },
+        'quiz-foreground', 'anim-enter-scale-up',
+        220, 350
+      );
+    }
   }
 
   /** エンディング画面へ */
   goToEnding() {
-    this._showScreen('ending');
-    this._screens.ending.show();
+    this._fadeTransition(
+      () => { this._showScreen('ending'); this._screens.ending.show(); },
+      'ending-foreground', 'anim-slide-in-up',
+      280, 500
+    );
+  }
+
+  /**
+   * 外部（ending.js 等）から呼び出す画面遷移（黒フェードのみ）
+   * @param {Function} callback - 遷移後に実行する処理
+   */
+  transitionTo(callback) {
+    this._fadeTransition(callback, null, null, 280, 280);
   }
 
   /** 開発チーム画面へ */
@@ -209,6 +251,78 @@ class App {
   }
 
   // ---- private ----
+
+  /**
+   * 黒オーバーレイなし・前景要素のみのアニメーション遷移
+   * 退場アニメーション完了後に画面切り替え → 入場アニメーション
+   * story ↔ quiz のように背景が同じ画面間のシームレスな遷移に使用
+   * @param {string}   exitFgId       - 退場する要素のID
+   * @param {string}   exitClass      - 退場アニメーションクラス名
+   * @param {Function} callback       - 画面切り替え処理
+   * @param {string}   enterFgId      - 入場する要素のID
+   * @param {string}   enterClass     - 入場アニメーションクラス名
+   * @param {number}   exitDurationMs - 退場アニメーション時間 ms
+   */
+  _foregroundTransition(exitFgId, exitClass, callback, enterFgId, enterClass, exitDurationMs) {
+    if (this._transitioning) return;
+    this._transitioning = true;
+    const exitEl = document.getElementById(exitFgId);
+    if (exitEl) {
+      exitEl.classList.remove(exitClass);
+      void exitEl.offsetWidth;
+      exitEl.classList.add(exitClass);
+    }
+    setTimeout(() => {
+      if (exitEl) exitEl.classList.remove(exitClass);
+      callback();
+      this._transitioning = false;
+      const enterEl = document.getElementById(enterFgId);
+      if (enterEl) {
+        enterEl.classList.remove(enterClass);
+        void enterEl.offsetWidth;
+        enterEl.classList.add(enterClass);
+      }
+    }, exitDurationMs);
+  }
+
+  /**
+   * 黒フェードオーバーレイを使った画面遷移
+   * フェードイン → callback（画面切り替え）→ フォアグラウンドにスライドアニメーション適用 → フェードアウト
+   * @param {Function} callback      - 画面切り替え処理（黒の下で即時実行）
+   * @param {string|null} fgId       - スライドアニメーションを適用する要素ID（null なら適用しない）
+   * @param {string|null} slideClass - 適用する CSS クラス名
+   * @param {number} fadeInMs        - フェードイン時間 ms
+   * @param {number} fadeOutMs       - フェードアウト時間 ms
+   */
+  _fadeTransition(callback, fgId, slideClass, fadeInMs = 250, fadeOutMs = 350) {
+    if (this._transitioning) return;
+    this._transitioning = true;
+    const overlay = document.getElementById('scene-transition');
+    overlay.style.transitionDuration = `${fadeInMs}ms`;
+    overlay.classList.add('fade-in');
+
+    setTimeout(() => {
+      // 黒の下で画面切り替え
+      callback();
+      this._transitioning = false;
+
+      // フォアグラウンドのスライドアニメーションを再起動
+      if (fgId && slideClass) {
+        const fg = document.getElementById(fgId);
+        if (fg) {
+          fg.classList.remove(slideClass);
+          void fg.offsetWidth; // reflow でアニメーションをリセット
+          fg.classList.add(slideClass);
+        }
+      }
+
+      // フェードアウト（新画面がスライドインしながら現れる）
+      overlay.style.transitionDuration = `${fadeOutMs}ms`;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        overlay.classList.remove('fade-in');
+      }));
+    }, fadeInMs);
+  }
 
   /**
    * 画面下部に一時的なトーストメッセージを表示する

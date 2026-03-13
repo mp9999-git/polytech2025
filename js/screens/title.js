@@ -75,7 +75,8 @@ class TitleScreen {
       overlay.classList.remove('hidden', 'mode1');
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 1.5s ease';
-      requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+      // 二重 rAF: opacity:0 が確実に描画されてから 1 に変更する
+      requestAnimationFrame(() => requestAnimationFrame(() => { overlay.style.opacity = '1'; }));
       titleText.style.visibility = 'hidden';
       logoPanel.classList.add('hidden');
     } else if (mode === 1) {
@@ -84,8 +85,8 @@ class TitleScreen {
       overlay.src = `assets/images/title${titleNum}.webp`;
       overlay.classList.remove('hidden');
       overlay.classList.add('mode1');
+      overlay.style.transition = 'none';
       overlay.style.opacity = '0';
-      overlay.style.transition = 'opacity 1.5s ease';
       titleText.style.visibility = 'hidden';
 
       // 画像ロード後にパネルサイズを画像に合わせて設定
@@ -95,15 +96,26 @@ class TitleScreen {
         const imgH    = overlay.offsetHeight;
         logoPanel.style.top    = `${imgTop - PAD}px`;
         logoPanel.style.height = `${imgH + PAD * 2}px`;
+
+        logoPanel.style.transition = 'none';
         logoPanel.classList.remove('hidden');
         logoPanel.style.opacity = '0';
-        requestAnimationFrame(() => {
-          overlay.style.opacity  = '1';
-          logoPanel.style.opacity = '1';
-        });
+        overlay.style.opacity   = '0';
+
+        // transition 復元後に opacity:1 → フェードイン
+        // setTimeout でブラウザが opacity:0 を確実にペイントしてから発火させる
+        setTimeout(() => {
+          overlay.style.transition   = 'opacity 1.5s ease';
+          logoPanel.style.transition = 'opacity 1.5s ease';
+          requestAnimationFrame(() => {
+            overlay.style.opacity   = '1';
+            logoPanel.style.opacity = '1';
+          });
+        }, 32);
       };
+      // キャッシュ済みでも rAF で1フレーム遅らせてレイアウト確定後に実行
       if (overlay.complete && overlay.naturalHeight > 0) {
-        syncPanel();
+        requestAnimationFrame(syncPanel);
       } else {
         overlay.onload = syncPanel;
       }

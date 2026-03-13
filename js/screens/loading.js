@@ -162,19 +162,18 @@ class LoadingScreen {
       img.src = src;
     }));
 
-    // 音声プリロード（canplaythrough イベントまで待機）
-    // canplaythrough = 「最後まで途切れずに再生できる」と判断できた時点
-    // タイムアウト3秒を設けることで、ネットワークが遅くてもゲームが止まらないようにする
+    // 音声プリロード（fetch で HTTP キャッシュに先読み）
+    // new Audio() を使わず fetch() でダウンロードすることで Audio 要素を生成しない。
+    // → SoundManager が後で new Audio() を生成したとき競合せず即キャッシュヒットする。
+    // → iOS Safari も fetch は gesture なしで実行できるため loading 中に HTTP キャッシュを埋められる。
     const audPromises = AUDIO_ASSETS.map(src => new Promise(resolve => {
-      const aud = new Audio();
-      aud.preload = 'auto';
       let settled = false;
-      // settled フラグで「もし複数回呼ばれても一度だけ処理する」ようにしている
       const done = () => { if (settled) return; settled = true; updateProgress(); resolve(); };
-      aud.addEventListener('canplaythrough', done, { once: true });
-      aud.addEventListener('error', done, { once: true });
-      setTimeout(done, 3000); // タイムアウト3秒でも続行（音声が長い場合の保険）
-      aud.src = src;
+      setTimeout(done, 3000); // タイムアウト3秒でも続行（ネットワークが遅い場合の保険）
+      fetch(src)
+        .then(res => res.blob()) // レスポンスボディを消費して確実に HTTP キャッシュに保存
+        .then(done)
+        .catch(done);
     }));
 
     // データプリロード（JSON/テキストを fetch して app.dataCache に保存）

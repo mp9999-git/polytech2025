@@ -1714,3 +1714,68 @@ html, body {
   100% { transform: translateY(160px) scaleX(0.85); opacity: 0; }
 }
 
+
+/* ===================================================
+   画面遷移アニメーション
+   =================================================== */
+
+/* 黒フェードオーバーレイ */
+#scene-transition {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.25s ease;
+}
+#scene-transition.fade-in {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* フォアグラウンドラッパー（背景を除く全要素を包む） */
+.screen-foreground {
+  position: absolute;
+  inset: 0;
+}
+
+/* 右からスライドインしながらフェードイン */
+@keyframes sc-slide-in-right {
+  from { transform: translateX(60px) scale(0.94); opacity: 0; }
+  to   { transform: translateX(0)    scale(1);    opacity: 1; }
+}
+
+/* 下からせり上がりながらフェードイン（エンディング用） */
+@keyframes sc-slide-in-up {
+  from { transform: translateY(80px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.anim-slide-in-right {
+  animation: sc-slide-in-right 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-slide-in-up {
+  animation: sc-slide-in-up 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* 左に縮小しながら退場（ストーリー・クイズ共通） */
+@keyframes sc-exit-to-left {
+  from { transform: translateX(0)     scale(1);    opacity: 1; }
+  to   { transform: translateX(-60px) scale(0.94); opacity: 0; }
+}
+
+/* スケールアップしながらフェードイン（スライドなし） */
+@keyframes sc-enter-scale-up {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.anim-exit-to-left {
+  animation: sc-exit-to-left 0.3s cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+.anim-enter-scale-up {
+  animation: sc-enter-scale-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

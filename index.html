@@ -140,17 +140,19 @@
         <img id="story-bg" src="assets/images/haikei.webp" alt="">
         <div id="story-bg-overlay"></div>
       </div>
-      <img id="story-char" class="story-char-img" src="" alt="">
-      <div id="story-msg-window">
-        <div id="story-msg-header">
-          <span id="story-teacher-name"></span>
+      <div class="screen-foreground" id="story-foreground">
+        <img id="story-char" class="story-char-img" src="" alt="">
+        <div id="story-msg-window">
+          <div id="story-msg-header">
+            <span id="story-teacher-name"></span>
+          </div>
+          <div id="story-msg-body">
+            <p id="story-msg-text"></p>
+          </div>
+          <button id="btn-story-next" class="story-next-btn">次へ ▶</button>
         </div>
-        <div id="story-msg-body">
-          <p id="story-msg-text"></p>
-        </div>
-        <button id="btn-story-next" class="story-next-btn">次へ ▶</button>
+        <button class="btn-back-to-title" id="story-back-btn">スタートへ戻る</button>
       </div>
-      <button class="btn-back-to-title" id="story-back-btn">スタートへ戻る</button>
     </div>
 
     <!-- ===== クイズ画面 ===== -->
@@ -159,47 +161,49 @@
         <img id="quiz-bg" src="assets/images/haikei.webp" alt="">
         <div id="quiz-bg-overlay"></div>
       </div>
-      <!-- 左エリア: キャラクター + 親密度 -->
-      <div id="quiz-left">
-        <div id="quiz-intimacy-display">
-          <span id="quiz-intimacy-label">親密度：</span>
-          <span id="quiz-intimacy-value">0</span>
-        </div>
-        <img id="quiz-char" class="quiz-char-img" src="" alt="">
-        <!-- 親密度エフェクト -->
-        <div id="intimacy-effect" class="hidden"></div>
-        <!-- 紙吹雪Canvas -->
-        <canvas id="confetti-canvas"></canvas>
-      </div>
-      <!-- 右エリア -->
-      <div id="quiz-right">
-        <!-- 問題文 -->
-        <div id="quiz-question-card">
-          <div id="quiz-q-num"></div>
-          <div id="quiz-question-text"></div>
-        </div>
-        <!-- 選択肢 -->
-        <div id="quiz-choices">
-          <button class="quiz-choice-btn" data-idx="0"></button>
-          <button class="quiz-choice-btn" data-idx="1"></button>
-          <button class="quiz-choice-btn" data-idx="2"></button>
-        </div>
-        <!-- メッセージウィンドウ -->
-        <div id="quiz-msg-window">
-          <div id="quiz-msg-header">
-            <span id="quiz-teacher-name"></span>
+      <div class="screen-foreground" id="quiz-foreground">
+        <!-- 左エリア: キャラクター + 親密度 -->
+        <div id="quiz-left">
+          <div id="quiz-intimacy-display">
+            <span id="quiz-intimacy-label">親密度：</span>
+            <span id="quiz-intimacy-value">0</span>
           </div>
-          <div id="quiz-msg-body">
-            <p id="quiz-msg-text"></p>
-          </div>
-          <button id="btn-quiz-next" class="quiz-next-btn hidden">次へ ▶</button>
+          <img id="quiz-char" class="quiz-char-img" src="" alt="">
+          <!-- 親密度エフェクト -->
+          <div id="intimacy-effect" class="hidden"></div>
+          <!-- 紙吹雪Canvas -->
+          <canvas id="confetti-canvas"></canvas>
         </div>
+        <!-- 右エリア -->
+        <div id="quiz-right">
+          <!-- 問題文 -->
+          <div id="quiz-question-card">
+            <div id="quiz-q-num"></div>
+            <div id="quiz-question-text"></div>
+          </div>
+          <!-- 選択肢 -->
+          <div id="quiz-choices">
+            <button class="quiz-choice-btn" data-idx="0"></button>
+            <button class="quiz-choice-btn" data-idx="1"></button>
+            <button class="quiz-choice-btn" data-idx="2"></button>
+          </div>
+          <!-- メッセージウィンドウ -->
+          <div id="quiz-msg-window">
+            <div id="quiz-msg-header">
+              <span id="quiz-teacher-name"></span>
+            </div>
+            <div id="quiz-msg-body">
+              <p id="quiz-msg-text"></p>
+            </div>
+            <button id="btn-quiz-next" class="quiz-next-btn hidden">次へ ▶</button>
+          </div>
+        </div>
+        <!-- ステージクリアオーバーレイ -->
+        <div id="quiz-clear-overlay" class="hidden">
+          <div id="quiz-clear-text">ステージクリア！</div>
+        </div>
+        <button class="btn-back-to-title" id="quiz-back-btn">スタートへ戻る</button>
       </div>
-      <!-- ステージクリアオーバーレイ -->
-      <div id="quiz-clear-overlay" class="hidden">
-        <div id="quiz-clear-text">ステージクリア！</div>
-      </div>
-      <button class="btn-back-to-title" id="quiz-back-btn">スタートへ戻る</button>
     </div>
 
     <!-- ===== エンディング画面 ===== -->
@@ -207,15 +211,17 @@
       <div id="ending-bg-wrap">
         <img id="ending-bg" src="" alt="">
       </div>
-      <div id="ending-chars-container"></div>
-      <div id="ending-type-text"></div>
-      <div id="ending-msg-window">
-        <div id="ending-msg-body">
-          <p id="ending-msg-text"></p>
+      <div class="screen-foreground" id="ending-foreground">
+        <div id="ending-chars-container"></div>
+        <div id="ending-type-text"></div>
+        <div id="ending-msg-window">
+          <div id="ending-msg-body">
+            <p id="ending-msg-text"></p>
+          </div>
         </div>
+        <button id="btn-ending-title" class="btn-back-to-title">スタートへ戻る</button>
+        <canvas id="ending-confetti-canvas"></canvas>
       </div>
-      <button id="btn-ending-title" class="btn-back-to-title">スタートへ戻る</button>
-      <canvas id="ending-confetti-canvas"></canvas>
     </div>
 
     <!-- ===== 問題閲覧モード画面 ===== -->
@@ -344,6 +350,9 @@
 
     <!-- トーストメッセージ -->
     <div id="game-toast" class="hidden"></div>
+
+    <!-- 画面遷移オーバーレイ（黒フェード） -->
+    <div id="scene-transition"></div>
 
   </div><!-- /#game-container -->
 </div><!-- /#game-wrapper -->

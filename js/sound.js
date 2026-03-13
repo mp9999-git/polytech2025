@@ -3,9 +3,9 @@
  * BGM・SE の再生管理、WakeLock、Page Visibility 対応
  *
  * 【主な機能】
- *  - BGM: BGM ファイルごとに専用の <audio> 要素を事前生成し src を固定する。
- *         切り替え時は src を変えず play()/pause() のみ呼ぶ → 再バッファリングなし・即時再生。
- *         停止時は短いフェードアウト（80ms）を挟んでデジタルクリックを防止する。
+ *  - BGM: playBGM() 呼び出し時に初めて new Audio() を生成（遅延初期化）。
+ *         一度生成した Audio オブジェクトはキャッシュして再利用する。
+ *         切り替え時は短いフェードアウト（80ms）を挟んでデジタルクリックを防止する。
  *  - SE: Web Audio API（AudioBufferSourceNode）で低遅延再生
  *       AudioContext 未対応時は new Audio() でフォールバック
  *  - WakeLock API: 画面スリープを防止（スマートフォン向け）
@@ -18,9 +18,9 @@
  * 【iOS Safari のオーディオ制限について】
  *  iOS はユーザー操作（タップ等）なしに音声を再生できない。
  *  initAudioContext() をモード選択ボタンのハンドラ内で呼ぶことで AudioContext を解除する。
- *  BGM の play() は goToTitle() → playBGM() という同期的な呼び出し連鎖を通じて
- *  ユーザージェスチャーコンテキスト内で実行されるため、個別のバルクアンロックは不要。
- *  （バルクアンロック＝10曲同時起動は iOS オーディオエンジンに過負荷をかけてノイズの原因になる）
+ *  opening BGM は initAudioContext() 内で事前生成・load() し、HTTP キャッシュから高速バッファリング。
+ *  他 BGM は playBGM() 呼び出し時に遅延生成する（loading.js の fetch() で HTTP キャッシュ済み）。
+ *  全 BGM の一括 play()→pause() はノイズの原因になるため廃止した。
  */
 
 const BGM_FILES = {
@@ -56,17 +56,9 @@ class SoundManager {
     this._seGainNode = null;  // SE 全体の音量制御ノード
     this._seBuffers  = {};    // デコード済み AudioBuffer のキャッシュ
 
-    // BGM ごとに専用 <audio> 要素を生成して src を固定する。
-    // src の切り替えを行わないことで再バッファリングによる遅延を防ぐ。
+    // BGM は playBGM() 呼び出し時に遅延生成してキャッシュする。
+    // 起動時の全曲プリロードは行わない（iOS 負荷軽減のため）。
     this._bgmPlayers = {};
-    for (const [key, src] of Object.entries(BGM_FILES)) {
-      const audio = new Audio();
-      audio.src     = src;
-      audio.loop    = true;
-      audio.preload = 'auto';
-      audio.volume  = this._bgmVolume;
-      this._bgmPlayers[key] = audio;
-    }
 
     this._initVisibility();
     this._initBeforeUnload();
@@ -75,15 +67,25 @@ class SoundManager {
   /** BGM 再生（同じ曲が既に再生中なら何もしない） */
   playBGM(key) {
     if (this._muted) return;
-    if (!this._bgmPlayers[key]) return;
-    if (this._currentBGMKey === key && !this._bgmPlayers[key].paused) return;
+    if (!BGM_FILES[key]) return;
+    if (this._currentBGMKey === key && this._bgmPlayers[key] && !this._bgmPlayers[key].paused) return;
 
     // 再生中の別曲をフェードアウトして停止（デジタルクリック防止）
-    if (this._currentBGMKey && this._currentBGMKey !== key) {
+    if (this._currentBGMKey && this._currentBGMKey !== key && this._bgmPlayers[this._currentBGMKey]) {
       this._fadeAndStop(this._bgmPlayers[this._currentBGMKey]);
     }
 
     this._currentBGMKey = key;
+
+    // 未生成なら new Audio() で遅延生成してキャッシュ
+    if (!this._bgmPlayers[key]) {
+      const audio = new Audio(BGM_FILES[key]);
+      audio.loop    = true;
+      audio.volume  = this._bgmVolume;
+      audio.preload = 'auto'; // HTTP キャッシュからの読み込みを即開始
+      this._bgmPlayers[key] = audio;
+    }
+
     const player = this._bgmPlayers[key];
 
     // 再生対象 player に進行中のフェードがあればキャンセルして音量を復元
@@ -102,8 +104,7 @@ class SoundManager {
   stopBGM() {
     if (this._currentBGMKey) {
       const player = this._bgmPlayers[this._currentBGMKey];
-      player.pause();
-      player.currentTime = 0;
+      if (player) { player.pause(); player.currentTime = 0; }
     }
     this._currentBGMKey = null;
     this._bgmPaused     = false;
@@ -113,7 +114,7 @@ class SoundManager {
   pauseBGM() {
     if (!this._currentBGMKey) return;
     const player = this._bgmPlayers[this._currentBGMKey];
-    if (!player.paused) {
+    if (player && !player.paused) {
       player.pause();
       this._bgmPaused = true;
     }
@@ -122,8 +123,11 @@ class SoundManager {
   /** BGM 再開 */
   resumeBGM() {
     if (this._bgmPaused && this._currentBGMKey) {
-      const p = this._bgmPlayers[this._currentBGMKey].play();
-      if (p) p.catch(() => {});
+      const player = this._bgmPlayers[this._currentBGMKey];
+      if (player) {
+        const p = player.play();
+        if (p) p.catch(() => {});
+      }
       this._bgmPaused = false;
     }
   }
@@ -204,10 +208,13 @@ class SoundManager {
    * Web Audio API を初期化して SE ファイルを事前デコードする。
    * iOS の制限により必ずユーザー操作のイベントハンドラ内から呼ぶこと。
    *
-   * BGM のバルクアンロック（全曲同時 play）はここでは行わない。
-   * playBGM() はこのメソッドの直後に同期的に呼ばれるため、
-   * ユーザージェスチャーコンテキスト内で実行されて iOS の制限が自然に解除される。
-   * バルクアンロックは iOS オーディオエンジンに過負荷をかけてノイズを引き起こすため廃止した。
+   * タイトル画面で再生する opening BGM（2曲）をここで事前生成し load() を呼ぶ。
+   * iOS Safari はユーザージェスチャー内で load() を呼ぶことでバッファリングを開始できる。
+   * loading 画面の fetch() で HTTP キャッシュ済みのため、バッファリングは高速に完了する。
+   * このメソッド直後に playBGM() が呼ばれるため、Audio 要素はすでに存在して即再生できる。
+   *
+   * ※ 全 BGM の一括 play()→pause()（旧バルクアンロック）は廃止。
+   *    iOS オーディオエンジンに過負荷をかけてノイズを引き起こすため。
    */
   initAudioContext() {
     if (this._audioCtx) return; // 二重初期化防止
@@ -219,6 +226,18 @@ class SoundManager {
       this._decodeSEBuffers();
     } catch (e) {
       // Web Audio API 非対応環境では何もしない（new Audio() フォールバックで動作継続）
+    }
+
+    // ユーザージェスチャー内で opening BGM を事前生成・バッファリング開始（iOS 対応）
+    for (const key of ['opening1', 'opening2']) {
+      if (!this._bgmPlayers[key]) {
+        const audio = new Audio(BGM_FILES[key]);
+        audio.loop    = true;
+        audio.volume  = this._bgmVolume;
+        audio.preload = 'auto';
+        audio.load(); // iOS: ジェスチャー内で呼ぶことでバッファリングを許可・開始
+        this._bgmPlayers[key] = audio;
+      }
     }
   }
 

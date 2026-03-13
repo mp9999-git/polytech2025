@@ -402,8 +402,11 @@ class QuizScreen {
       this._stageCleared = true;
       this._nextStageKey = nextStage;
 
-      // クリアオーバーレイ表示（透明・クリック透過）
+      // クリアオーバーレイ表示（スケールアップ+フェードで入場）
       this._clearOverlay.classList.remove('hidden');
+      this._clearOverlay.classList.remove('anim-enter-scale-up');
+      void this._clearOverlay.offsetWidth;
+      this._clearOverlay.classList.add('anim-enter-scale-up');
       this._createClearParticles();
       this._app.sound.playBGM('clear');
 

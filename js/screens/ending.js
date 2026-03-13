@@ -47,7 +47,7 @@ class EndingScreen {
       this._app.sound.playSE('button');
       this._confetti.stop();
       this._stopTyping();
-      this._app.goToTitle();
+      this._app.transitionTo(() => this._app.goToTitle());
     });
   }
 
